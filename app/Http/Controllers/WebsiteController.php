@@ -74,7 +74,7 @@ class WebsiteController extends Controller
         $number = $request->input('number', '');
         $attributes = explode(',', $request->input('attributes', ''));
 
-        $query = Card::whereRaw("REPLACE(name, '''', '') = ?", [$name])
+        $query = Card::whereRaw("REPLACE(name, '''', '’') = ?", [$name])
             ->where('set', $set)
             ->where('number', $number)
             ->public()
