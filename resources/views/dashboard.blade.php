@@ -2,7 +2,7 @@
     <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
         <div class="relative h-full flex-1 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
             <div class="flex h-full w-full flex-col">
-                <div class="flex items-center justify-between border-b border-neutral-200 bg-neutral-50 px-4 py-2 dark:border-neutral-700 dark:bg-neutral-800">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-neutral-200 bg-neutral-50 px-4 py-2 dark:border-neutral-700 dark:bg-neutral-800">
                     <h1 class="text-2xl font-bold text-neutral-800 dark:text-neutral-200">
                         {{ __('My Cards') }}
                     </h1>
@@ -21,7 +21,7 @@
                     @if($cards->isEmpty())
                         <p class="text-center text-gray-500">{{ __('No cards found. You can add cards with the button in the top right.') }}</p>
                     @else
-                        <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
+                        <table class="w-full max-w-full divide-y divide-neutral-200 dark:divide-neutral-700 table-fixed">
                             <thead class="bg-neutral-100 dark:bg-neutral-800">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
@@ -54,46 +54,48 @@
                                             {{ $card->number ?? __('N/A') }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            @if($card->is_foil)
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                                    {{ __('Foil') }}
-                                                </span>
-                                            @endif
-                                            @if($card->is_borderless)
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                                    {{ __('Borderless') }}
-                                                </span>
-                                            @endif
-                                            @if($card->is_retro_frame)
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                                                    {{ __('Retro Frame') }}
-                                                </span>
-                                            @endif
-                                            @if($card->is_etched_foil)
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                                                    {{ __('Etched Foil') }}
-                                                </span>
-                                            @endif
-                                            @if($card->is_judge_promo_foil)
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                                                    {{ __('Judge Promo Foil') }}
-                                                </span>
-                                            @endif
-                                            @if($card->is_japanese_language)
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200">
-                                                    {{ __('Japanese Language') }}
-                                                </span>
-                                            @endif
-                                            @if($card->is_signed_by_artist)
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200">
-                                                    {{ __('Signed by Artist') }}
-                                                </span>
-                                            @endif
-                                            @if($card->is_private)
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 ml-2">
-                                                    {{ __('Private') }}
-                                                </span>
-                                            @endif
+                                            <div class="card-attributes" style="flex-wrap: wrap; max-width: 100vw; overflow-x: auto;">
+                                                @if($card->is_foil)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                                        {{ __('Foil') }}
+                                                    </span>
+                                                @endif
+                                                @if($card->is_borderless)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                                        {{ __('Borderless') }}
+                                                    </span>
+                                                @endif
+                                                @if($card->is_retro_frame)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                                        {{ __('Retro Frame') }}
+                                                    </span>
+                                                @endif
+                                                @if($card->is_etched_foil)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                                                        {{ __('Etched Foil') }}
+                                                    </span>
+                                                @endif
+                                                @if($card->is_judge_promo_foil)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                                                        {{ __('Judge Promo Foil') }}
+                                                    </span>
+                                                @endif
+                                                @if($card->is_japanese_language)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200">
+                                                        {{ __('Japanese Language') }}
+                                                    </span>
+                                                @endif
+                                                @if($card->is_signed_by_artist)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200">
+                                                        {{ __('Signed by Artist') }}
+                                                    </span>
+                                                @endif
+                                                @if($card->is_private)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 ml-2">
+                                                        {{ __('Private') }}
+                                                    </span>
+                                                @endif
+                                            </div>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <a href="#" 
                                                 class="edit-card-link inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-900 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800 dark:hover:text-white mr-2"

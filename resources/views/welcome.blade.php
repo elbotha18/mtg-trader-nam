@@ -91,8 +91,8 @@
 
     <!-- Cards Table -->
     <section class="w-full max-w-4xl mx-auto px-4 flex-1">
-        <div class="overflow-x-auto rounded-lg shadow bg-white dark:bg-[#161615]">
-            <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
+        <div class="overflow-x-auto w-full rounded-lg shadow bg-white dark:bg-[#161615]">
+            <table class="w-full divide-y divide-neutral-200 dark:divide-neutral-700 table-fixed">
                 <thead class="bg-neutral-100 dark:bg-neutral-800">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Name</th>
@@ -161,7 +161,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">${card.set}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">${card.number || 'N/A'}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200 max-w-xs overflow-x-auto">
-                            <div class="flex flex-wrap gap-1">
+                            <div class="welcome-attributes card-attributes flex flex-wrap gap-1">
                                 ${card.is_foil ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">Foil</span>' : ''}
                                 ${card.is_borderless ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Borderless</span>' : ''}
                                 ${card.is_retro_frame ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">Retro Frame</span>' : ''}
