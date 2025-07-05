@@ -67,6 +67,8 @@ class WebsiteController extends Controller
      */
     public function showCard(Request $request)
     {
+        Log::info('Request data:', $request->all()); // Log all request inputs
+
         $name = $request->input('name');
         $set = $request->input('set');
         $number = $request->input('number', '');
