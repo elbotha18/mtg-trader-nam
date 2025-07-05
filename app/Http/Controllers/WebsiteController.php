@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Card;
+use Illuminate\Support\Facades\Log;
 
 class WebsiteController extends Controller
 {
@@ -46,7 +47,7 @@ class WebsiteController extends Controller
         }
 
         $cards = $cards->map(function($card) {
-            $card->name = str_replace("'", '', $card->name);
+            $card->name = str_replace("'", '’', $card->name);
             return $card;
         });
 
@@ -85,6 +86,12 @@ class WebsiteController extends Controller
                 }
             }
         }
+
+        // Temporary debugging
+        Log::info('Show Card Query:', [
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings(),
+        ]);
 
         $card_sellers = $query->get();
 
