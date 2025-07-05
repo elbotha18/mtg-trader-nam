@@ -9,6 +9,7 @@ use Livewire\Volt\Component;
 new class extends Component {
     public string $name = '';
     public string $email = '';
+    public string $cellphone = '';
 
     /**
      * Mount the component.
@@ -17,6 +18,7 @@ new class extends Component {
     {
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
+        $this->cellphone = Auth::user()->cellphone ?? '';
     }
 
     /**
@@ -37,6 +39,8 @@ new class extends Component {
                 'max:255',
                 Rule::unique(User::class)->ignore($user->id)
             ],
+
+            'cellphone' => ['nullable', 'string', 'max:32'],
         ]);
 
         $user->fill($validated);
@@ -97,6 +101,8 @@ new class extends Component {
                     </div>
                 @endif
             </div>
+
+            <flux:input wire:model="cellphone" :label="__('Cellphone')" type="text" autocomplete="tel" />
 
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">
