@@ -45,6 +45,11 @@ class WebsiteController extends Controller
                 ->get();
         }
 
+        $cards = $cards->map(function($card) {
+            $card->name = str_replace("'", '', $card->name);
+            return $card;
+        });
+
         // Group by name, set, and number (if number is present)
         $grouped = $cards->unique(function($item) {
             return $item->name . '|' . $item->set . '|' . ($item->number ?? '');
@@ -66,7 +71,7 @@ class WebsiteController extends Controller
         $number = $request->input('number', '');
         $attributes = explode(',', $request->input('attributes', ''));
 
-        $query = Card::where('name', $name)
+        $query = Card::whereRaw("REPLACE(name, '''', '') = ?", [$name])
             ->where('set', $set)
             ->where('number', $number)
             ->public()
@@ -86,8 +91,8 @@ class WebsiteController extends Controller
         $sellers = [];
         foreach ($card_sellers as $card) {
             $sellers[] = (object) [
-                'name' => $card->user->name,
-                'cellphone' => $card->user->cellphone,
+                'name' => $card->user?->name,
+                'cellphone' => $card->user?->cellphone,
                 'is_foil' => $card->is_foil,
                 'is_borderless' => $card->is_borderless,
                 'is_retro_frame' => $card->is_retro_frame,
@@ -103,7 +108,7 @@ class WebsiteController extends Controller
             'name' => $name,
             'set' => $set,
             'number' => $number,
-            'sellers' => $sellers,
+            'sellers' => $sellers
         ];
 
         return view('card', compact('card'));
