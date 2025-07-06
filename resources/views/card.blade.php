@@ -47,6 +47,10 @@
                 <span class="font-semibold">Set:</span> {{ $card->set }}<br>
                 <span class="font-semibold">Number:</span> {{ $card->number ?? __('N/A') }}
             </div>
+            <div id="card-image" class="my-4">
+                <!-- Image will be shown here -->
+            </div>
+
             <hr class="my-6 border-neutral-200 dark:border-neutral-700">
             <h2 class="text-lg font-semibold mb-3 text-neutral-700 dark:text-neutral-200">Sellers ({{ count($card->sellers) }})</h2>
             @if(empty($card->sellers))
@@ -114,3 +118,63 @@
     </section>
 </body>
 </html>
+
+<script>
+    // Function to fetch and display card image
+    async function fetchCardImage() {
+        const setName = @json($card->set); // e.g., 'dmu'
+        const setNumber = @json($card->number); // e.g., '103'
+        const cardName = @json($card->name);
+
+        if (setName && setNumber) {
+            // Scryfall API uses lowercase set codes
+            const imageUrl = await getCardImage(setName.toLowerCase(), setNumber);
+            if (imageUrl) {
+                const cardImageDiv = document.getElementById('card-image');
+                const imgElement = document.createElement('img');
+                imgElement.src = imageUrl;
+                imgElement.alt = cardName;
+                imgElement.className = 'w-full h-auto rounded-lg shadow-md';
+                cardImageDiv.appendChild(imgElement);
+            } else {
+                console.warn('No image found for this card.');
+            }
+        } else {
+            console.error('Set name or number is missing.');
+        }
+    }
+
+    // Call the function to fetch the card image
+    fetchCardImage();
+    async function getCardImage(setName, setNumber) {
+        try {
+            const response = await fetch(`https://api.scryfall.com/cards/${setName}/${setNumber}`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            return data.image_uris?.normal || null; // Return the normal image URL
+        } catch (error) {
+            console.error('Error fetching card image:', error);
+            return null;
+        }
+    }
+</script>
+
+<style>
+    #card-image img {
+        max-width: 100%;
+        max-height: 600px;
+        width: auto;
+        height: auto;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin: 0 auto;
+    }
+
+    @media (max-width: 640px) {
+        #card-image img {
+            max-height: 400px;
+        }
+    }
+</style>
