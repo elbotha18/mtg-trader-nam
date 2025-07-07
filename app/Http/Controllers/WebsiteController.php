@@ -24,8 +24,11 @@ class WebsiteController extends Controller
                     ->orWhere('number', 'like', '%' . $query . '%');
                 })
                 ->orderBy('name', 'asc')
-                ->public()
+                ->whereHas('user_card', function($q) {
+                    $q->where('is_private', false);
+                })
                 ->get();
+            
         } else {
             $query = $request->input('search', '');
             $attributes = explode(',', $request->input('attributes', []));
@@ -42,7 +45,9 @@ class WebsiteController extends Controller
                     }
                 })
                 ->orderBy('name', 'asc')
-                ->public()
+                ->whereHas('user_card', function($q) {
+                    $q->where('is_private', false);
+                })
                 ->get();
         }
 
@@ -67,8 +72,6 @@ class WebsiteController extends Controller
      */
     public function showCard(Request $request)
     {
-        Log::info('Request data:', $request->all()); // Log all request inputs
-
         $name = $request->input('name');
         $set = $request->input('set');
         $number = $request->input('number', '');
@@ -77,8 +80,7 @@ class WebsiteController extends Controller
         $query = Card::whereRaw("REPLACE(name, '''', '’') = ?", [$name])
             ->where('set', $set)
             ->where('number', $number)
-            ->public()
-            ->with('user');
+            ->with('seller');
 
         // If advanced attributes are present, filter sellers by those attributes
         if ($request->has('advanced') && !empty($attributes[0])) {
@@ -89,27 +91,27 @@ class WebsiteController extends Controller
             }
         }
 
-        // Temporary debugging
-        Log::info('Show Card Query:', [
-            'sql' => $query->toSql(),
-            'bindings' => $query->getBindings(),
-        ]);
-
-        $card_sellers = $query->get();
+        $card = $query->first();
 
         $sellers = [];
-        foreach ($card_sellers as $card) {
+        foreach ($card->user_card as $userCard) {
+            if (!$userCard) {
+                continue; // Skip if user_card is not found
+            }
+            if (!$userCard->user) {
+                continue; // Skip if user does not exist
+            }
             $sellers[] = (object) [
-                'name' => $card->user?->name,
-                'cellphone' => $card->user?->cellphone,
-                'is_foil' => $card->is_foil,
-                'is_borderless' => $card->is_borderless,
-                'is_retro_frame' => $card->is_retro_frame,
-                'is_etched_foil' => $card->is_etched_foil,
-                'is_judge_promo_foil' => $card->is_judge_promo_foil,
-                'is_japanese_language' => $card->is_japanese_language,
-                'is_signed_by_artist' => $card->is_signed_by_artist,
-                'created_at' => $card->created_at,
+                'name' => $userCard->user->name,
+                'cellphone' => $userCard->user->cellphone,
+                'is_foil' => $userCard->is_foil,
+                'is_borderless' => $userCard->is_borderless,
+                'is_retro_frame' => $userCard->is_retro_frame,
+                'is_etched_foil' => $userCard->is_etched_foil,
+                'is_judge_promo_foil' => $userCard->is_judge_promo_foil,
+                'is_japanese_language' => $userCard->is_japanese_language,
+                'is_signed_by_artist' => $userCard->is_signed_by_artist,
+                'created_at' => $userCard->created_at,
             ];
         }
 

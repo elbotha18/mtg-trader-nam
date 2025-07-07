@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Auth;
 use Illuminate\Http\Request;
 use App\Models\Card;
+use App\Models\UserCard;
 
 class DashboardController extends Controller
 {
@@ -15,9 +16,32 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $cards = Card::where('user_id', Auth::id())
+        $cards = UserCard::where('user_id', Auth::id())
+            ->with('card')
             ->orderBy('created_at', 'desc')
             ->get();
+
+        // Format the cards for the dashboard view
+        $cards = $cards->map(function ($userCard) {
+            $card = $userCard->card;
+            if ($card) {
+                $card->name = str_replace("'", '’', $card->name);
+                $card->set = $card->set ?? '';
+                $card->number = $card->number ?? '';
+                $card->is_private = $userCard->is_private;
+                $card->is_foil = $userCard->is_foil;
+                $card->is_borderless = $userCard->is_borderless;
+                $card->is_retro_frame = $userCard->is_retro_frame;
+                $card->is_etched_foil = $userCard->is_etched_foil;
+                $card->is_judge_promo_foil = $userCard->is_judge_promo_foil;
+                $card->is_japanese_language = $userCard->is_japanese_language;
+                $card->is_signed_by_artist = $userCard->is_signed_by_artist;
+                $card->created_at = $userCard->created_at;
+                $card->updated_at = $userCard->updated_at;
+                $card->id = $userCard->id;
+            }
+            return $card;
+        });
 
         return view('dashboard', compact('cards'));
     }
@@ -33,6 +57,8 @@ class DashboardController extends Controller
         $request->validate([
             'cards' => 'required|string',
         ]);
+
+        $existingCards = Card::get('id', 'set', 'number');
         
         $cards = explode("\n", $request->input('cards'));
         $data = [];
@@ -43,14 +69,17 @@ class DashboardController extends Controller
             if (!empty($card)) {
                 // Parse the card details
                 preg_match('/^(?P<quantity>\d+)?\s*(?P<name>.+?)(?:\s*\((?P<set>[^)]+)\))?\s*(?P<number>[\w-]+)?\s*(?P<foil>\*F\*)?$/i', $card, $matches);
+                // Check if the card already exists else add it
+                $card_id = $this->getCardId($matches['name'] ?? '', $matches['set'] ?? '', $matches['number'] ?? '', $existingCards);
+                if (!$card_id) {
+                    continue; // Skip if card ID could not be determined
+                }
+                dd($card_id);
                 
                 $data[] = [
                     'user_id' => $userId,
-                    'name' => $matches['name'] ?? '',
-                    'set' => $matches['set'] ?? '',
-                    'number' => $matches['number'] ?? '',
+                    'card_id' => $card_id,
                     'is_foil' => isset($matches['foil']),
-                    'is_private' => false, // Default to public
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
@@ -59,10 +88,29 @@ class DashboardController extends Controller
 
         // Insert the cards into the database
         if (!empty($data)) {
-            Card::insert($data);
+            UserCard::insert($data);
         }
 
         return redirect()->route('dashboard')->with('success', __('Cards added successfully.'));
+    }
+
+    private function getCardId($name, $set, $number, $existingCards)
+    {
+        // Normalize the name
+        $name = str_replace("'", '’', $name);
+        // Check if the card already exists
+        foreach ($existingCards as $card) {
+            if ($card->name === $name && $card->set === $set && $card->number === $number) {
+                return $card->id;
+            }
+        }
+        // If not found, create a new card
+        return Card::create([
+            'user_id' => Auth::id(),
+            'name' => $name,
+            'set' => $set,
+            'number' => $number,
+        ])->id;
     }
 
     /**
