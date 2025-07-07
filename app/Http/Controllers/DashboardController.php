@@ -74,7 +74,6 @@ class DashboardController extends Controller
                 if (!$card_id) {
                     continue; // Skip if card ID could not be determined
                 }
-                dd($card_id);
                 
                 $data[] = [
                     'user_id' => $userId,
@@ -106,7 +105,6 @@ class DashboardController extends Controller
         }
         // If not found, create a new card
         return Card::create([
-            'user_id' => Auth::id(),
             'name' => $name,
             'set' => $set,
             'number' => $number,
@@ -122,16 +120,10 @@ class DashboardController extends Controller
     public function updateCard(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:cards,id',
-            'name' => 'required|string|max:255',
-            'set' => 'nullable|string|max:255',
-            'number' => 'nullable|string|max:50',
+            'id' => 'required|exists:user_cards,id',
         ]);
-        $card = Card::findOrFail($request->input('id'));
+        $card = UserCard::findOrFail($request->input('id'));
         $card->update([
-            'name' => $request->input('name'),
-            'set' => $request->input('set'),
-            'number' => $request->input('number'),
             'is_foil' => $request->input('is_foil', false) ? true : false,
             'is_borderless' => $request->input('is_borderless', false) ? true : false,
             'is_retro_frame' => $request->input('is_retro_frame', false) ? true : false,
@@ -153,9 +145,9 @@ class DashboardController extends Controller
     public function deleteCard(Request $request)
     {
         $request->validate([
-            'id' => 'required|exists:cards,id',
+            'id' => 'required|exists:user_cards,id',
         ]);
-        $card = Card::findOrFail($request->input('id'));
+        $card = UserCard::findOrFail($request->input('id'));
         $card->delete();
         return redirect()->route('dashboard')->with('success', __('Card deleted successfully.'));
     }
