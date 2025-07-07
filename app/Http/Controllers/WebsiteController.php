@@ -75,6 +75,18 @@ class WebsiteController extends Controller
         return response()->json($grouped);
     }
 
+    public function addImage(Request $request)
+    {
+        $request->validate([
+            'card_id' => 'required|exists:cards,id',
+            'image_url' => 'required|url'
+        ]);
+        $card = Card::find($request->card_id);
+        $card->image_url = $request->image_url;
+        $card->save();
+        return response()->json(['success' => true]);
+    }
+
     /**
      * Show a specific card based on the query parameters.
      *
@@ -127,9 +139,11 @@ class WebsiteController extends Controller
         }
 
         $card = (object) [
+            'id' => $card->id,
             'name' => $name,
             'set' => $set,
             'number' => $number,
+            'image_url' => $card->image_url,
             'sellers' => $sellers
         ];
 

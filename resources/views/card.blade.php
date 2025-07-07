@@ -8,6 +8,7 @@
     <meta property="og:image" content="/logo.webp">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="/logo.webp">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -123,45 +124,60 @@
 </html>
 
 <script>
-    // Function to fetch and display card image
     async function fetchCardImage() {
-        const setName = @json($card->set); // e.g., 'dmu'
-        const setNumber = @json($card->number); // e.g., '103'
+        const setName = @json($card->set);
+        const setNumber = @json($card->number);
         const cardName = @json($card->name);
+        const cardId = @json($card->id);
+        const imageUrl = @json($card->image_url);
 
-        if (setName && setNumber) {
-            // Scryfall API uses lowercase set codes
-            const imageUrl = await getCardImage(setName.toLowerCase(), setNumber);
-            if (imageUrl) {
-                const cardImageDiv = document.getElementById('card-image');
-                const imgElement = document.createElement('img');
-                imgElement.src = imageUrl;
-                imgElement.alt = cardName;
-                imgElement.className = 'w-full h-auto rounded-lg shadow-md';
-                cardImageDiv.appendChild(imgElement);
-            } else {
-                console.warn('No image found for this card.');
+        const cardImageDiv = document.getElementById('card-image');
+        cardImageDiv.innerHTML = ''; // Clear previous image if any
+
+        if (imageUrl) {
+            // Use stored image
+            const imgElement = document.createElement('img');
+            imgElement.src = imageUrl;
+            imgElement.alt = cardName;
+            imgElement.className = 'w-full h-auto rounded-lg shadow-md';
+            cardImageDiv.appendChild(imgElement);
+        } else if (setName && setNumber) {
+            // Fetch from Scryfall
+            try {
+                const response = await fetch(`https://api.scryfall.com/cards/${setName.toLowerCase()}/${setNumber}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+                if (data.image_uris && data.image_uris.normal) {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = data.image_uris.normal;
+                    imgElement.alt = cardName;
+                    imgElement.className = 'w-full h-auto rounded-lg shadow-md';
+                    cardImageDiv.appendChild(imgElement);
+
+                    // Store image URL in backend
+                    if (cardId) {
+                        fetch('/cards/add-image', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({ card_id: cardId, image_url: data.image_uris.normal })
+                        });
+                    }
+                } else {
+                    cardImageDiv.innerHTML = '<span class="text-neutral-400">No image found for this card.</span>';
+                }
+            } catch (error) {
+                cardImageDiv.innerHTML = '<span class="text-neutral-400">Error loading image.</span>';
             }
         } else {
-            console.error('Set name or number is missing.');
+            cardImageDiv.innerHTML = '<span class="text-neutral-400">Set name or number is missing.</span>';
         }
     }
 
     // Call the function to fetch the card image
     fetchCardImage();
-    async function getCardImage(setName, setNumber) {
-        try {
-            const response = await fetch(`https://api.scryfall.com/cards/${setName}/${setNumber}`);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const data = await response.json();
-            return data.image_uris?.normal || null; // Return the normal image URL
-        } catch (error) {
-            console.error('Error fetching card image:', error);
-            return null;
-        }
-    }
 </script>
 
 <style>

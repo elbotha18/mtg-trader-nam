@@ -12,7 +12,8 @@ class Card extends Model
     protected $fillable = [
         'name',
         'set',
-        'number'
+        'number',
+        'image_url'
     ];
 
     /**

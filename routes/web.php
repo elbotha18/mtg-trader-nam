@@ -12,6 +12,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('cards', [WebsiteController::class, 'searchCards'])->name('cards.search');
+Route::post('/cards/add-image', [WebsiteController::class, 'addImage'])->name('cards.add-image');
 
 Route::get('card', [WebsiteController::class, 'showCard'])->name('card');
 

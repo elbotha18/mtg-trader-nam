@@ -175,7 +175,8 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200 card-name-hover"
                             data-set="${card.set}"
                             data-number="${card.number || ''}"
-                            data-name="${card.name}">
+                            data-name="${card.name}"
+                            data-image-url="${card.image_url || ''}">
                             ${window.isLoggedIn ? `
                                 <button class="wishlist-btn mr-2" data-card-id="${card.id}" aria-label="Add to wishlist" style="background:none;border:none;cursor:pointer;">
                                     <svg class="w-5 h-4 ${card.is_wishlisted ? 'text-red-500 fill-red-400' : 'text-red-400'} hover:text-red-600 transition" 
@@ -255,19 +256,23 @@
                 const set = target.getAttribute('data-set');
                 const number = target.getAttribute('data-number');
                 const name = target.getAttribute('data-name');
-                // Use clientX/clientY for viewport-relative positioning
+                const cardId = target.querySelector('.wishlist-btn')?.getAttribute('data-card-id');
+                const imageUrl = target.getAttribute('data-image-url'); // Add this attribute when rendering if available
+
                 popup.style.left = (e.clientX + 20) + 'px';
                 popup.style.top = (e.clientY + 10) + 'px';
                 popup.classList.remove('hidden');
                 popupImg.classList.add('hidden');
                 popupLoading.classList.remove('hidden');
-                const cacheKey = set + '-' + number;
-                if (popupCache[cacheKey]) {
-                    popupImg.src = popupCache[cacheKey];
+
+                if (imageUrl) {
+                    // Use stored image
+                    popupImg.src = imageUrl;
                     popupImg.alt = name;
                     popupImg.classList.remove('hidden');
                     popupLoading.classList.add('hidden');
                 } else {
+                    // Fetch from Scryfall
                     try {
                         const resp = await fetch(`https://api.scryfall.com/cards/${set.toLowerCase()}/${number}`);
                         if (resp.ok) {
@@ -277,7 +282,20 @@
                                 popupImg.alt = name;
                                 popupImg.classList.remove('hidden');
                                 popupLoading.classList.add('hidden');
-                                popupCache[cacheKey] = data.image_uris.normal;
+                                // Store image URL in backend
+                                if (cardId) {
+                                    fetch('/cards/add-image', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                        },
+                                        body: JSON.stringify({ card_id: cardId, image_url: data.image_uris.normal })
+                                    }).then(() => {
+                                        // Update the DOM so future hovers use the stored image
+                                        target.setAttribute('data-image-url', data.image_uris.normal);
+                                    });
+                                }
                             } else {
                                 popupLoading.textContent = 'No image found.';
                             }
