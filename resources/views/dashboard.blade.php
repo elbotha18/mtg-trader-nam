@@ -179,26 +179,6 @@
                 @csrf
                 <input type="hidden" name="id" id="edit_card_id">
                 <div class="mb-4">
-                    <label for="edit_card_name" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                        {{ __('Name') }}
-                    </label>
-                    <input id="edit_card_name" name="name" type="text" class="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 dark:focus:border-blue-400" required>
-                </div>
-                <div class="mb-4 flex gap-4">
-                    <div class="w-1/2">
-                        <label for="edit_card_set" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                            {{ __('Set') }}
-                        </label>
-                        <input id="edit_card_set" name="set" type="text" class="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 dark:focus:border-blue-400" required>
-                    </div>
-                    <div class="w-1/2">
-                        <label for="edit_card_number" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                            {{ __('Number') }}
-                        </label>
-                        <input id="edit_card_number" name="number" type="text" class="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 dark:focus:border-blue-400">
-                    </div>
-                </div>
-                <div class="mb-4">
                     <div>
                         <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                             {{ __('Attributes') }}
@@ -296,9 +276,6 @@
             document.body.style.overflow = 'hidden';
             // Fill form fields
             document.getElementById('edit_card_id').value = card.id;
-            document.getElementById('edit_card_name').value = card.name;
-            document.getElementById('edit_card_set').value = card.set;
-            document.getElementById('edit_card_number').value = card.number || '';
             document.getElementById('edit_card_is_foil').checked = card.is_foil;
             document.getElementById('edit_card_is_borderless').checked = card.is_borderless;
             document.getElementById('edit_card_is_retro_frame').checked = card.is_retro_frame;
@@ -307,9 +284,6 @@
             document.getElementById('edit_card_is_japanese_language').checked = card.is_japanese_language;
             document.getElementById('edit_card_is_signed_by_artist').checked = card.is_signed_by_artist;
             document.getElementById('edit_card_is_private').checked = card.is_private;
-            setTimeout(() => {
-                document.getElementById('edit_card_name').focus();
-            }, 100);
         }
 
         function closeEditCardModal() {

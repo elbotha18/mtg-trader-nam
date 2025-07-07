@@ -5,6 +5,7 @@ use Livewire\Volt\Volt;
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WebsiteController;
+use App\Http\Controllers\WishlistController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -21,6 +22,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('card/delete', [DashboardController::class, 'deleteCard'])->name('card.delete');
     Route::post('card/toggle-private', [DashboardController::class, 'togglePrivate'])->name('card.toggle-private');
     Route::post('card/toggle-foil', [DashboardController::class, 'toggleFoil'])->name('card.toggle-foil');
+
+    Route::get('wishlist', [WishlistController::class, 'index'])->name('wishlist');
+    Route::post('toggle-wishlist', [WishlistController::class, 'toggleWishlist'])->name('wishlist.toggle');
+    Route::post('wishlist/bulk-add', [WishlistController::class, 'addCards'])->name('wishlist.add');
 });
 
 Route::middleware(['auth'])->group(function () {

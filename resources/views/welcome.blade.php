@@ -8,6 +8,7 @@
     <meta property="og:image" content="/logo.webp">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="/logo.webp">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -169,11 +170,21 @@
                     }
                 }
                 tbody.innerHTML += `
-                    <tr class="cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900 transition" onclick="window.location='${url}'">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200 card-name-hover" 
-                            data-set="${card.set}" 
-                            data-number="${card.number || ''}" 
+                    <tr class="cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900 transition"
+                        onclick="if(!event.target.closest('.wishlist-btn')) window.location='${url}'">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200 card-name-hover"
+                            data-set="${card.set}"
+                            data-number="${card.number || ''}"
                             data-name="${card.name}">
+                            ${window.isLoggedIn ? `
+                                <button class="wishlist-btn mr-2" data-card-id="${card.id}" aria-label="Add to wishlist" style="background:none;border:none;cursor:pointer;">
+                                    <svg class="w-5 h-4 ${card.is_wishlisted ? 'text-red-500 fill-red-400' : 'text-red-400'} hover:text-red-600 transition" 
+                                         fill="${card.is_wishlisted ? 'currentColor' : 'none'}" 
+                                         stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21C12 21 4 13.5 4 8.5C4 5.42 6.42 3 9.5 3C11.24 3 12.91 3.81 14 5.08C15.09 3.81 16.76 3 18.5 3C21.58 3 24 5.42 24 8.5C24 13.5 16 21 16 21H12Z"/>
+                                    </svg>
+                                </button>
+                            ` : ''}
                             ${card.name}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">${card.set}</td>
@@ -291,6 +302,43 @@
                 popup.classList.add('hidden');
             }
         });
+        // Wishlist button logic
+        document.addEventListener('click', async function(e) {
+            const btn = e.target.closest('.wishlist-btn');
+            if (btn) {
+                e.stopPropagation(); // Prevent row click navigation
+                e.preventDefault();
+                const cardId = btn.getAttribute('data-card-id');
+                try {
+                    const res = await fetch('/toggle-wishlist', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ card_id: cardId })
+                    });
+                    const data = await res.json();
+                    // Optionally, update the heart icon or show a message
+                    if (data.success) {
+                        btn.classList.toggle('active');
+                        const icon = btn.querySelector('svg');
+                        if (icon) {
+                            icon.classList.toggle('text-red-500');
+                            icon.classList.toggle('fill-red-400');
+                            icon.classList.toggle('text-red-400');
+                        }
+                    } else {
+                        alert(data.message || 'Could not update wishlist. Please try again.');
+                    }
+                } catch (err) {
+                    alert('Could not update wishlist. Please try again.');
+                }
+            }
+        });
+    </script>
+    <script>
+        window.isLoggedIn = {{ Auth::check() ? 'true' : 'false' }};
     </script>
 </body>
 

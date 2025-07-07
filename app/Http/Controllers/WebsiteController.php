@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
 use Illuminate\Http\Request;
 use App\Models\Card;
+use App\Models\UserWishlist;
 use Illuminate\Support\Facades\Log;
 
 class WebsiteController extends Controller
@@ -16,6 +18,13 @@ class WebsiteController extends Controller
      */
     public function searchCards(Request $request)
     {
+        // 1. Get the logged-in user's wishlist card IDs
+        $user = Auth::user();
+        $wishlistIds = [];
+        if ($user) {
+            $wishlistIds = UserWishlist::where('user_id', $user->id)->pluck('card_id')->toArray();
+        }
+
         if (!$request->advanced) {
             $query = $request->input('search', '');
             $cards = Card::where(function($q) use ($query) {
@@ -51,8 +60,10 @@ class WebsiteController extends Controller
                 ->get();
         }
 
-        $cards = $cards->map(function($card) {
+        // 2. Add is_wishlisted property to each card
+        $cards = $cards->map(function($card) use ($wishlistIds) {
             $card->name = str_replace("'", '’', $card->name);
+            $card->is_wishlisted = in_array($card->id, $wishlistIds);
             return $card;
         });
 
