@@ -8,9 +8,9 @@
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
             <a href="{{ route('home') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
-                <img src="/mtg.png" alt="MTG Logo" class="h-8 w-8 rounded" />
+                <img src="/logo.webp" alt="MTG Logo" class="h-8 w-8 rounded" />
                  <h1 class="text-xl font-bold tracking-tight text-[#1b1b18] dark:text-[#EDEDEC]">
-                    MTG Trader
+                    NAMTG Trader
                 </h1>
             </a>
 

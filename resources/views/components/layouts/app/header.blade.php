@@ -121,4 +121,6 @@
 
         @fluxScripts
     </body>
+
+    @include('partials.foot')
 </html>

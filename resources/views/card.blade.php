@@ -3,11 +3,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $card->name }} - MTG Trader</title>
+    <title>{{ $card->name }} - NAMTG Trader</title>
     <meta name="description" content="Browse the latest Magic: The Gathering cards and sellers in Namibia. Search, filter, and connect with local players.">
-    <meta property="og:image" content="/mtg.png">
+    <meta property="og:image" content="/logo.webp">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="/mtg.png">
+    <meta name="twitter:image" content="/logo.webp">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -28,10 +28,12 @@
     </script>
     <!-- Header -->
     <header class="w-full flex items-center justify-between px-6 py-4 bg-white dark:bg-[#161615] shadow-sm">
-        <div class="flex items-center gap-2">
-            <img src="/mtg.png" alt="MTG Logo" class="h-8 w-8 rounded" />
-            <span class="text-xl font-bold tracking-tight text-[#1b1b18] dark:text-[#EDEDEC]">MTG Trader</span>
-        </div>
+        <a href="{{ route('home') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
+                <img src="/logo.webp" alt="MTG Logo" class="h-8 w-8 rounded" />
+                 <h1 class="text-xl font-bold tracking-tight text-[#1b1b18] dark:text-[#EDEDEC]">
+                    NAMTG Trader
+                </h1>
+            </a>
         <nav class="flex items-center gap-4">
             <a href="/" class="px-5 py-1.5 rounded bg-neutral-200 text-[#1b1b18] font-medium hover:bg-neutral-300 transition">Home</a>
         </nav>

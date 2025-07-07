@@ -1,6 +1,6 @@
-# MTG Trader
+# NAMTG Trader
 
-MTG Trader is a modern web application for Magic: The Gathering players in Namibia to find, buy, and sell cards locally. Built with Laravel and Tailwind CSS, it provides a user-friendly dashboard for managing your collection, as well as a public-facing card search and seller discovery platform.
+NAMTG Trader is a modern web application for Magic: The Gathering players in Namibia to find, buy, and sell cards locally. Built with Laravel and Tailwind CSS, it provides a user-friendly dashboard for managing your collection, as well as a public-facing card search and seller discovery platform.
 
 ## Features
 

@@ -3,23 +3,30 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MTG Trader</title>
+    <title>NAMTG Trader</title>
     <meta name="description" content="Browse the latest Magic: The Gathering cards and sellers in Namibia. Search, filter, and connect with local players.">
-    <meta property="og:image" content="/mtg.png">
+    <meta property="og:image" content="/logo.webp">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="/mtg.png">
+    <meta name="twitter:image" content="/logo.webp">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
     @vite('resources/css/app.css')
+    <style>
+        #card-image-popup {
+            transition: opacity 0.15s;
+            opacity: 1;
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body class="bg-[#FDFDFC] dark:bg-[#0a0a0a] text-[#1b1b18] min-h-screen flex flex-col">
     <!-- Header -->
     <header class="w-full flex items-center justify-between px-6 py-4 bg-white dark:bg-[#161615] shadow-sm">
         <div class="flex items-center gap-2">
-            <img src="/mtg.png" alt="MTG Logo" class="h-8 w-8 rounded" />
-            <span class="text-xl font-bold tracking-tight text-[#1b1b18] dark:text-[#EDEDEC]">MTG Trader</span>
+            <img src="/logo.webp" alt="MTG Logo" class="h-8 w-8 rounded" />
+            <span class="text-xl font-bold tracking-tight text-[#1b1b18] dark:text-[#EDEDEC]">NAMTG Trader</span>
         </div>
         <nav class="flex items-center gap-4">
             @if (Route::has('login'))
@@ -37,7 +44,7 @@
 
     <!-- Intro -->
     <section class="w-full max-w-2xl mx-auto mt-10 mb-6 px-4">
-        <h1 class="text-3xl font-bold mb-2 text-center dark:text-neutral-400">Welcome to MTG Trader</h1>
+        <h1 class="text-3xl font-bold mb-2 text-center dark:text-neutral-400">Welcome to NAMTG Trader</h1>
         <h2 class="text-lg text-center text-neutral-600 dark:text-neutral-400 mb-4">Namibia's Magic Card Marketplace</h2>
         <p class="text-center text-neutral-700 dark:text-neutral-300 mb-4">
             This site helps Magic: The Gathering players in Namibia find, buy, and sell cards locally. Browse the latest cards, search for what you need, and connect with sellers in your area.
@@ -108,6 +115,12 @@
         </div>
     </section>
 
+    <!-- Card Image Popup -->
+    <div id="card-image-popup" class="hidden fixed z-50 bg-white dark:bg-neutral-900 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700 p-2" style="min-width:200px; pointer-events:none;">
+        <span id="popup-loading" class="text-xs text-neutral-400">Loading...</span>
+        <img id="popup-img" src="" alt="Card image" class="w-64 h-auto rounded-lg shadow-md hidden" />
+    </div>
+
     <script>
         // Dark mode logic (system default)
         if (
@@ -157,7 +170,12 @@
                 }
                 tbody.innerHTML += `
                     <tr class="cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900 transition" onclick="window.location='${url}'">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">${card.name}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200 card-name-hover" 
+                            data-set="${card.set}" 
+                            data-number="${card.number || ''}" 
+                            data-name="${card.name}">
+                            ${card.name}
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">${card.set}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">${card.number || 'N/A'}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200 max-w-xs overflow-x-auto">
@@ -213,6 +231,68 @@
         });
         // Initial load
         fetchCards();
+
+        // Card image popup logic
+        const popup = document.getElementById('card-image-popup');
+        const popupImg = document.getElementById('popup-img');
+        const popupLoading = document.getElementById('popup-loading');
+        let popupCache = {};
+
+        document.addEventListener('mouseover', async function(e) {
+            const target = e.target.closest('.card-name-hover');
+            if (target) {
+                const set = target.getAttribute('data-set');
+                const number = target.getAttribute('data-number');
+                const name = target.getAttribute('data-name');
+                // Use clientX/clientY for viewport-relative positioning
+                popup.style.left = (e.clientX + 20) + 'px';
+                popup.style.top = (e.clientY + 10) + 'px';
+                popup.classList.remove('hidden');
+                popupImg.classList.add('hidden');
+                popupLoading.classList.remove('hidden');
+                const cacheKey = set + '-' + number;
+                if (popupCache[cacheKey]) {
+                    popupImg.src = popupCache[cacheKey];
+                    popupImg.alt = name;
+                    popupImg.classList.remove('hidden');
+                    popupLoading.classList.add('hidden');
+                } else {
+                    try {
+                        const resp = await fetch(`https://api.scryfall.com/cards/${set.toLowerCase()}/${number}`);
+                        if (resp.ok) {
+                            const data = await resp.json();
+                            if (data.image_uris && data.image_uris.normal) {
+                                popupImg.src = data.image_uris.normal;
+                                popupImg.alt = name;
+                                popupImg.classList.remove('hidden');
+                                popupLoading.classList.add('hidden');
+                                popupCache[cacheKey] = data.image_uris.normal;
+                            } else {
+                                popupLoading.textContent = 'No image found.';
+                            }
+                        } else {
+                            popupLoading.textContent = 'No image found.';
+                        }
+                    } catch {
+                        popupLoading.textContent = 'Error loading image.';
+                    }
+                }
+            }
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (!popup.classList.contains('hidden')) {
+                // Use clientX/clientY for viewport-relative positioning
+                popup.style.left = (e.clientX + 20) + 'px';
+                popup.style.top = (e.clientY + 10) + 'px';
+            }
+        });
+        document.addEventListener('mouseout', function(e) {
+            if (e.target.closest('.card-name-hover')) {
+                popup.classList.add('hidden');
+            }
+        });
     </script>
 </body>
+
+@include('partials.foot')
 </html>
