@@ -450,16 +450,18 @@
             } else if (sortValue === 'name_desc') {
                 allCards.sort((a, b) => b.name.localeCompare(a.name));
             } else if (sortValue === 'date_asc') {
-                allCards.sort((a, b) => {
-                    if (!a.added_at) return 1;
-                    if (!b.added_at) return -1;
-                    return new Date(a.added_at) - new Date(b.added_at);
-                });
-            } else if (sortValue === 'date_desc') {
+                // Newest first (descending)
                 allCards.sort((a, b) => {
                     if (!a.added_at) return 1;
                     if (!b.added_at) return -1;
                     return new Date(b.added_at) - new Date(a.added_at);
+                });
+            } else if (sortValue === 'date_desc') {
+                // Oldest first (ascending)
+                allCards.sort((a, b) => {
+                    if (!a.added_at) return 1;
+                    if (!b.added_at) return -1;
+                    return new Date(a.added_at) - new Date(b.added_at);
                 });
             }
         }
