@@ -104,7 +104,7 @@
                                         @if($seller->name && $seller->cellphone)
                                         <div class="flex items-center justify-center">
                                             <a href="tel:{{ $seller->cellphone }}" class="underline">{{ $seller->cellphone }}</a>
-                                            <a href="https://wa.me/{{ preg_replace('/\D/', '', $seller->cellphone) }}?text={{ urlencode('Hi! I am interested in your ' . $card->name . ' on NAMTG Trader.') }}"
+                                            <a href="https://wa.me/{{ preg_replace('/\D/', '', $seller->cellphone) }}?text={{ urlencode('Hi! I am interested in your ' . $card->name . ' ('. $card->set .') '. $card->number .' on NAMTG Trader.') }}"
                                                target="_blank"
                                                rel="noopener"
                                                class="inline-block ml-2 align-middle"
