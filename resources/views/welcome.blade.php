@@ -114,7 +114,7 @@
             <table class="w-full divide-y divide-neutral-200 dark:divide-neutral-700 table-fixed">
                 <thead class="bg-neutral-100 dark:bg-neutral-800">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider min-w-[220px] max-w-[340px] w-1/3">Name</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Set</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Number</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Attributes</th>
@@ -200,7 +200,7 @@
                 tbody.innerHTML += `
                     <tr class="cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900 transition"
                         onclick="if(!event.target.closest('.wishlist-btn')) window.location='${url}'">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200 card-name-hover"
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200 card-name-hover overflow-x-wrap min-w-[250px] max-w-[340px] w-1/3" style="overflow-x: warp; white-space: wrap;"
                             data-set="${card.set}"
                             data-number="${card.number || ''}"
                             data-name="${card.name}"
@@ -340,11 +340,36 @@
                 const number = target.getAttribute('data-number');
                 const name = target.getAttribute('data-name');
                 const cardId = target.querySelector('.wishlist-btn')?.getAttribute('data-card-id');
-                const imageUrl = target.getAttribute('data-image-url'); // Add this attribute when rendering if available
+                const imageUrl = target.getAttribute('data-image-url');
 
-                popup.style.left = (e.clientX + 20) + 'px';
-                popup.style.top = (e.clientY + 10) + 'px';
+                // Default popup position
+                let left = e.clientX + 20;
+                let top = e.clientY + 10;
+
+                // Temporarily show popup to measure its size
                 popup.classList.remove('hidden');
+                popup.style.visibility = 'hidden';
+                popup.style.left = left + 'px';
+                popup.style.top = top + 'px';
+                // Wait for next frame to get dimensions
+                await new Promise(r => setTimeout(r, 0));
+                const popupRect = popup.getBoundingClientRect();
+                const winWidth = window.innerWidth;
+                const winHeight = window.innerHeight;
+                // Adjust if overflowing right
+                if (left + popupRect.width > winWidth - 10) {
+                    left = winWidth - popupRect.width - 10;
+                }
+                // Adjust if overflowing bottom
+                if (top + popupRect.height > winHeight - 10) {
+                    top = winHeight - popupRect.height - 10;
+                }
+                // Never less than 0
+                left = Math.max(10, left);
+                top = Math.max(10, top);
+                popup.style.left = left + 'px';
+                popup.style.top = top + 'px';
+                popup.style.visibility = '';
                 popupImg.classList.add('hidden');
                 popupLoading.classList.remove('hidden');
 
@@ -360,8 +385,14 @@
                         const resp = await fetch(`https://api.scryfall.com/cards/${set.toLowerCase()}/${number}`);
                         if (resp.ok) {
                             const data = await resp.json();
+                            let imgUrl = null;
                             if (data.image_uris && data.image_uris.normal) {
-                                popupImg.src = data.image_uris.normal;
+                                imgUrl = data.image_uris.normal;
+                            } else if (data.card_faces && data.card_faces.length && data.card_faces[0].image_uris && data.card_faces[0].image_uris.normal) {
+                                imgUrl = data.card_faces[0].image_uris.normal;
+                            }
+                            if (imgUrl) {
+                                popupImg.src = imgUrl;
                                 popupImg.alt = name;
                                 popupImg.classList.remove('hidden');
                                 popupLoading.classList.add('hidden');
@@ -373,10 +404,10 @@
                                             'Content-Type': 'application/json',
                                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                                         },
-                                        body: JSON.stringify({ card_id: cardId, image_url: data.image_uris.normal })
+                                        body: JSON.stringify({ card_id: cardId, image_url: imgUrl })
                                     }).then(() => {
                                         // Update the DOM so future hovers use the stored image
-                                        target.setAttribute('data-image-url', data.image_uris.normal);
+                                        target.setAttribute('data-image-url', imgUrl);
                                     });
                                 }
                             } else {
@@ -393,9 +424,21 @@
         });
         document.addEventListener('mousemove', function(e) {
             if (!popup.classList.contains('hidden')) {
-                // Use clientX/clientY for viewport-relative positioning
-                popup.style.left = (e.clientX + 20) + 'px';
-                popup.style.top = (e.clientY + 10) + 'px';
+                let left = e.clientX + 20;
+                let top = e.clientY + 10;
+                const popupRect = popup.getBoundingClientRect();
+                const winWidth = window.innerWidth;
+                const winHeight = window.innerHeight;
+                if (left + popupRect.width > winWidth - 10) {
+                    left = winWidth - popupRect.width - 10;
+                }
+                if (top + popupRect.height > winHeight - 10) {
+                    top = winHeight - popupRect.height - 10;
+                }
+                left = Math.max(10, left);
+                top = Math.max(10, top);
+                popup.style.left = left + 'px';
+                popup.style.top = top + 'px';
             }
         });
         document.addEventListener('mouseout', function(e) {
