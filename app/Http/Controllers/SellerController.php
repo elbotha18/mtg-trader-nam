@@ -23,6 +23,7 @@ class SellerController extends Controller
 
         return view('sellers', compact('sellers'));
     }
+
     /**
      * Toggle favourite status for a seller for the logged-in user.
      */
@@ -49,6 +50,10 @@ class SellerController extends Controller
                 'seller_id' => $sellerId,
             ]);
             $isFavourited = true;
+        }
+        // Check if the request has a redirect_back parameter
+        if ($request->has('redirect_back') && $request->input('redirect_back')) {
+            return redirect()->back()->with('success', __('Favourite Seller updated successfully.'));
         }
 
         return response()->json(['favourited' => $isFavourited]);
