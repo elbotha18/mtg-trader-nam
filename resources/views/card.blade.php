@@ -102,7 +102,7 @@
                                     </td>
                                     <td class="px-4 py-2 text-sm text-blue-700 dark:text-blue-300">
                                         @if($seller->name && $seller->cellphone)
-                                        <div class="flex items-center">
+                                        <div class="flex items-center justify-center">
                                             <a href="tel:{{ $seller->cellphone }}" class="underline">{{ $seller->cellphone }}</a>
                                             <a href="https://wa.me/{{ preg_replace('/\D/', '', $seller->cellphone) }}?text={{ urlencode('Hi! I am interested in your ' . $card->name . ' on NAMTG Trader.') }}"
                                                target="_blank"
@@ -206,5 +206,12 @@
         #card-image img {
             max-height: 400px;
         }
+    }
+    .text-green-500  {
+        color: #10B981 !important; /* Tailwind green-500 */
+    }
+    
+    .text-green-600 {
+        color: #059669 !important; /* Tailwind green-600 */
     }
 </style>
