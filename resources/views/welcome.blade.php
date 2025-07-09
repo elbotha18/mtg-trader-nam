@@ -116,6 +116,11 @@
         </div>
     </section>
 
+    <!-- Pagination -->
+    <div id="pagination" class="flex justify-center items-center gap-2 mt-4">
+        <!-- Pagination buttons will be rendered here -->
+    </div>
+
     <!-- Card Image Popup -->
     <div id="card-image-popup" class="hidden fixed z-50 bg-white dark:bg-neutral-900 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700 p-2" style="min-width:200px; pointer-events:none;">
         <span id="popup-loading" class="text-xs text-neutral-400">Loading...</span>
@@ -134,6 +139,10 @@
         }
     </script>
     <script>
+        let allCards = [];
+        let currentPage = 1;
+        const perPage = 50;
+
         function getAdvancedAttributes() {
             const attrs = [];
             document.querySelectorAll('.adv-attr').forEach(cb => {
@@ -153,13 +162,21 @@
                 }
             }
             const res = await fetch(url);
-            const cards = await res.json();
+            allCards = await res.json();
+            currentPage = 1;
+            renderCards();
+            renderPagination();
+        }
+        function renderCards() {
             const tbody = document.getElementById('cardsTableBody');
             tbody.innerHTML = '';
-            if (!cards.length) {
+            if (!allCards.length) {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-neutral-500">No cards found.</td></tr>`;
                 return;
             }
+            const start = (currentPage - 1) * perPage;
+            const end = start + perPage;
+            const cards = allCards.slice(start, end);
             for (const card of cards) {
                 // Build showCard URL with advanced/attributes if present
                 let url = `/card?name=${encodeURIComponent(card.name)}&set=${encodeURIComponent(card.set)}&number=${encodeURIComponent(card.number || '')}`;
@@ -204,6 +221,59 @@
                     </tr>
                 `;
             }
+        }
+        function renderPagination() {
+            const lastPage = Math.ceil(allCards.length / perPage);
+            let html = '';
+            if (lastPage <= 1) {
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+            html += `<nav class="flex justify-center items-center gap-1 mt-6" aria-label="Pagination">`;
+
+            // Previous button
+            html += `<button class="px-3 py-1 rounded-full border border-neutral-300 cursor-pointer dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-blue-100 dark:hover:bg-blue-900 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                ${currentPage === 1 ? 'disabled' : ''}
+                onclick="goToPage(${currentPage - 1})"
+                aria-label="Previous page">&lt;</button>`;
+
+            let start = Math.max(1, currentPage - 2);
+            let end = Math.min(lastPage, start + 4);
+            if (end - start < 4) start = Math.max(1, end - 4);
+
+            if (start > 1) {
+                html += `<button class="px-3 py-1 rounded-full border border-neutral-300 cursor-pointer dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-blue-100 dark:hover:bg-blue-900 transition"
+                    onclick="goToPage(1)">1</button>`;
+                if (start > 2) html += `<span class="px-2 text-neutral-400">…</span>`;
+            }
+            for (let i = start; i <= end; i++) {
+                html += `<button class="px-3 py-1 rounded-full border ${i === currentPage
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'border-neutral-300 cursor-pointer dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-blue-100 dark:hover:bg-blue-900 transition'}"
+                    onclick="goToPage(${i})"
+                    ${i === currentPage ? 'aria-current="page"' : ''}>${i}</button>`;
+            }
+            if (end < lastPage) {
+                if (end < lastPage - 1) html += `<span class="px-2 text-neutral-400">…</span>`;
+                html += `<button class="px-3 py-1 rounded-full border border-neutral-300 cursor-pointer dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-blue-100 dark:hover:bg-blue-900 transition"
+                    onclick="goToPage(${lastPage})">${lastPage}</button>`;
+            }
+
+            // Next button
+            html += `<button class="px-3 py-1 rounded-full border border-neutral-300 cursor-pointer dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-blue-100 dark:hover:bg-blue-900 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                ${currentPage === lastPage ? 'disabled' : ''}
+                onclick="goToPage(${currentPage + 1})"
+                aria-label="Next page">&gt;</button>`;
+
+            html += `</nav>`;
+            document.getElementById('pagination').innerHTML = html;
+        }
+        function goToPage(page) {
+            const lastPage = Math.ceil(allCards.length / perPage);
+            if (page < 1 || page > lastPage || page === currentPage) return;
+            currentPage = page;
+            renderCards();
+            renderPagination();
         }
         // Debounced search with advanced
         let searchTimeout;

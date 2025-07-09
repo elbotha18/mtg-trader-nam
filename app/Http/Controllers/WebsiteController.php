@@ -70,7 +70,7 @@ class WebsiteController extends Controller
         // Group by name, set, and number (if number is present)
         $grouped = $cards->unique(function($item) {
             return $item->name . '|' . $item->set . '|' . ($item->number ?? '');
-        })->values()->take(50);
+        })->values();
 
         return response()->json($grouped);
     }

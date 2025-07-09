@@ -43,7 +43,12 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-neutral-200 dark:bg-neutral-900 dark:divide-neutral-700">
                                 @foreach($cards as $card)
-                                    <tr>
+                                    <tr class="card-name-hover cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900 transition"
+                                        data-id="{{ $card->id }}"
+                                        data-set="{{ $card->set }}"
+                                        data-number="{{ $card->number }}"
+                                        data-name="{{ $card->name }}"
+                                        data-image-url="{{ $card->image_url }}">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">
                                             {{ $card->name }}
                                         </td>
@@ -246,6 +251,12 @@
         </div>
     </div>
 
+    <!-- Card Image Popup -->
+    <div id="card-image-popup" class="hidden fixed z-50 bg-white dark:bg-neutral-900 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700 p-2" style="min-width:200px; pointer-events:none;">
+        <span id="popup-loading" class="text-xs text-neutral-400">Loading...</span>
+        <img id="popup-img" src="" alt="Card image" class="w-64 h-auto rounded-lg shadow-md hidden" />
+    </div>
+
     <script>
         function openAddCardsModal() {
             const modal = document.getElementById('addCardsModal');
@@ -340,6 +351,77 @@
                 const card = JSON.parse(this.dataset.card);
                 openEditCardModal(card);
             });
+        });
+
+        // Card image popup
+        const popup = document.getElementById('card-image-popup');
+        const popupImg = document.getElementById('popup-img');
+        const popupLoading = document.getElementById('popup-loading');
+
+        document.addEventListener('mouseover', async function(e) {
+            const target = e.target.closest('.card-name-hover');
+            if (target) {
+                const cardId = target.getAttribute('data-id');
+                const set = target.getAttribute('data-set');
+                const number = target.getAttribute('data-number');
+                const name = target.getAttribute('data-name');
+                const imageUrl = target.getAttribute('data-image-url');
+                popup.style.left = (e.clientX + 20) + 'px';
+                popup.style.top = (e.clientY + 10) + 'px';
+                popup.classList.remove('hidden');
+                popupImg.classList.add('hidden');
+                popupLoading.classList.remove('hidden');
+                if (imageUrl) {
+                    popupImg.src = imageUrl;
+                    popupImg.alt = name;
+                    popupImg.classList.remove('hidden');
+                    popupLoading.classList.add('hidden');
+                } else {
+                    try {
+                        const resp = await fetch(`https://api.scryfall.com/cards/${set.toLowerCase()}/${number}`);
+                        if (resp.ok) {
+                            const data = await resp.json();
+                            if (data.image_uris && data.image_uris.normal) {
+                                popupImg.src = data.image_uris.normal;
+                                popupImg.alt = name;
+                                popupImg.classList.remove('hidden');
+                                popupLoading.classList.add('hidden');
+                                // Store image URL in backend
+                                if (cardId) {
+                                    fetch('/cards/add-image', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                        },
+                                        body: JSON.stringify({ card_id: cardId, image_url: data.image_uris.normal })
+                                    }).then(() => {
+                                        // Update the DOM so future hovers use the stored image
+                                        target.setAttribute('data-image-url', data.image_uris.normal);
+                                    });
+                                }
+                            } else {
+                                popupLoading.textContent = 'No image found.';
+                            }
+                        } else {
+                            popupLoading.textContent = 'No image found.';
+                        }
+                    } catch {
+                        popupLoading.textContent = 'Error loading image.';
+                    }
+                }
+            }
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (!popup.classList.contains('hidden')) {
+                popup.style.left = (e.clientX + 20) + 'px';
+                popup.style.top = (e.clientY + 10) + 'px';
+            }
+        });
+        document.addEventListener('mouseout', function(e) {
+            if (e.target.closest('.card-name-hover')) {
+                popup.classList.add('hidden');
+            }
         });
     </script>
 </x-layouts.app>
