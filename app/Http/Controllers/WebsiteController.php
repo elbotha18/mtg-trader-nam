@@ -58,6 +58,7 @@ class WebsiteController extends Controller
                 ->whereHas('user_card', function($q) {
                     $q->where('is_private', false);
                 })
+                ->with('user_card')
                 ->get();
         }
 
@@ -73,13 +74,13 @@ class WebsiteController extends Controller
                 $userCard = $card->user_card()->orderByDesc('created_at')->first();
                 $addedAt = $userCard ? $userCard->created_at : null;
             }
-            $card->added_at = $addedAt ? $addedAt->format('Y-m-d') : null;
+            $card->added_at = $addedAt ? $addedAt->format('Y-m-d H:i:s') : null;
             return $card;
         });
 
         // Group by name, set, and number (if number is present)
         $grouped = $cards->unique(function($item) {
-            return $item->name . '|' . $item->set . '|' . ($item->number ?? '');
+            return $item->name . '|' . $item->set . '|' . ($item->number ?? '') . '|' . $item->added_at;
         })->values();
 
         return response()->json($grouped);
