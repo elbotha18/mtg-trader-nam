@@ -61,10 +61,19 @@ class WebsiteController extends Controller
                 ->get();
         }
 
-        // 2. Add is_wishlisted property to each card
+        // 2. Add is_wishlisted property and added_at to each card
         $cards = $cards->map(function($card) use ($wishlistIds) {
             $card->name = str_replace("'", '’', $card->name);
             $card->is_wishlisted = in_array($card->id, $wishlistIds);
+            // Get the most recent user_card's created_at as added_at
+            $addedAt = null;
+            if ($card->relationLoaded('user_card') && $card->user_card->count()) {
+                $addedAt = $card->user_card->max('created_at');
+            } elseif (method_exists($card, 'user_card')) {
+                $userCard = $card->user_card()->orderByDesc('created_at')->first();
+                $addedAt = $userCard ? $userCard->created_at : null;
+            }
+            $card->added_at = $addedAt ? $addedAt->format('Y-m-d') : null;
             return $card;
         });
 

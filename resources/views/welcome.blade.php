@@ -97,6 +97,17 @@
         </div>
     </section>
 
+    <!-- Sort Dropdown -->
+    <div class="w-full max-w-4xl mx-auto px-4 mb-2 flex justify-end">
+        <label for="sortSelect" class="mr-2 text-sm text-neutral-700 dark:text-neutral-300">Sort by:</label>
+        <select id="sortSelect" class="rounded-md border border-neutral-300 px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200">
+            <option value="name_asc">Name (A → Z)</option>
+            <option value="name_desc">Name (Z → A)</option>
+            <option value="date_asc">Date Added (Newest)</option>
+            <option value="date_desc">Date Added (Oldest)</option>
+        </select>
+    </div>
+
     <!-- Cards Table -->
     <section class="w-full max-w-4xl mx-auto px-4 flex-1">
         <div class="overflow-x-auto w-full rounded-lg shadow bg-white dark:bg-[#161615]">
@@ -426,6 +437,24 @@
                 }
             }
         });
+        document.getElementById('sortSelect').addEventListener('change', function() {
+            sortCards(this.value);
+            renderCards();
+            renderPagination();
+        });
+
+        function sortCards(sortValue) {
+            if (!allCards || !allCards.length) return;
+            if (sortValue === 'name_asc') {
+                allCards.sort((a, b) => a.name.localeCompare(b.name));
+            } else if (sortValue === 'name_desc') {
+                allCards.sort((a, b) => b.name.localeCompare(a.name));
+            } else if (sortValue === 'date_asc') {
+                allCards.sort((a, b) => new Date(a.added_at) - new Date(b.added_at));
+            } else if (sortValue === 'date_desc') {
+                allCards.sort((a, b) => new Date(b.added_at) - new Date(a.added_at));
+            }
+        }
     </script>
     <script>
         window.isLoggedIn = {{ Auth::check() ? 'true' : 'false' }};
