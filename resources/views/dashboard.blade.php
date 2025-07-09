@@ -43,14 +43,16 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-neutral-200 dark:bg-neutral-900 dark:divide-neutral-700">
                                 @foreach($cards as $card)
-                                    <tr class="card-name-hover cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900 transition"
-                                        data-id="{{ $card->id }}"
-                                        data-set="{{ $card->set }}"
-                                        data-number="{{ $card->number }}"
-                                        data-name="{{ $card->name }}"
-                                        data-image-url="{{ $card->image_url }}">
+                                    <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">
-                                            {{ $card->name }}
+                                            <span class="card-name-hover cursor-pointer"
+                                                data-id="{{ $card->id }}"
+                                                data-set="{{ $card->set }}"
+                                                data-number="{{ $card->number }}"
+                                                data-name="{{ $card->name }}"
+                                                data-image-url="{{ $card->image_url }}">
+                                                {{ $card->name }}
+                                            </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">
                                             {{ $card->set }}
@@ -354,12 +356,12 @@
         });
 
         // Card image popup
-        const popup = document.getElementById('card-image-popup');
-        const popupImg = document.getElementById('popup-img');
-        const popupLoading = document.getElementById('popup-loading');
+        var popup = document.getElementById('card-image-popup');
+        var popupImg = document.getElementById('popup-img');
+        var popupLoading = document.getElementById('popup-loading');
 
         document.addEventListener('mouseover', async function(e) {
-            const target = e.target.closest('.card-name-hover');
+            const target = e.target.classList.contains('card-name-hover') ? e.target : null;
             if (target) {
                 const cardId = target.getAttribute('data-id');
                 const set = target.getAttribute('data-set');
@@ -419,7 +421,7 @@
             }
         });
         document.addEventListener('mouseout', function(e) {
-            if (e.target.closest('.card-name-hover')) {
+            if (e.target.classList.contains('card-name-hover')) {
                 popup.classList.add('hidden');
             }
         });

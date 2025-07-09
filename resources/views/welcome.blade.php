@@ -208,7 +208,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">${card.set}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">${card.number || 'N/A'}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200 max-w-xs overflow-x-auto">
-                            <div class="welcome-attributes card-attributes flex flex-wrap gap-1">
+                            <div class="card-attributes flex flex-wrap gap-1">
                                 ${card.is_foil ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">Foil</span>' : ''}
                                 ${card.is_borderless ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Borderless</span>' : ''}
                                 ${card.is_retro_frame ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">Retro Frame</span>' : ''}
@@ -315,10 +315,12 @@
         fetchCards();
 
         // Card image popup logic
-        const popup = document.getElementById('card-image-popup');
-        const popupImg = document.getElementById('popup-img');
-        const popupLoading = document.getElementById('popup-loading');
-        let popupCache = {};
+        // Only declare if not already declared
+        if (typeof popup === 'undefined') {
+            var popup = document.getElementById('card-image-popup');
+            var popupImg = document.getElementById('popup-img');
+            var popupLoading = document.getElementById('popup-loading');
+        }
 
         document.addEventListener('mouseover', async function(e) {
             const target = e.target.closest('.card-name-hover');

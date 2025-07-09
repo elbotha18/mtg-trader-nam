@@ -64,4 +64,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserWishlist::class);
     }
+
+    public function sellers()
+    {
+        return $this->hasMany(UserSeller::class, 'user_id');
+    }
 }

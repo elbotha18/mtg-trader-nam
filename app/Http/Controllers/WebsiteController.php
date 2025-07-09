@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Auth;
 use Illuminate\Http\Request;
 use App\Models\Card;
+use App\Models\User;
 use App\Models\UserWishlist;
 use Illuminate\Support\Facades\Log;
 
@@ -115,6 +116,11 @@ class WebsiteController extends Controller
         }
 
         $card = $query->first();
+        $user = null;
+        if (Auth::check()) {
+            $user = Auth::user();
+            $user->load('sellers');
+        }
 
         $sellers = [];
         foreach ($card->user_card as $userCard) {
@@ -124,9 +130,16 @@ class WebsiteController extends Controller
             if (!$userCard->user) {
                 continue; // Skip if user does not exist
             }
+            $is_favourited = false;
+            if ($user) {
+                $seller = $user->sellers->where('seller_id', $userCard->user->id);
+                $is_favourited = $seller->isNotEmpty();
+            }
             $sellers[] = (object) [
+                'id' => $userCard->user->id,
                 'name' => $userCard->user->name,
                 'cellphone' => $userCard->user->cellphone,
+                'is_favourited' => $is_favourited,
                 'is_foil' => $userCard->is_foil,
                 'is_borderless' => $userCard->is_borderless,
                 'is_retro_frame' => $userCard->is_retro_frame,
@@ -149,5 +162,52 @@ class WebsiteController extends Controller
 
         return view('card', compact('card'));
     }
+
+    /**
+     * Display the seller's information.
+     *
+     * @param int $id
+     * @return \Illuminate\View\View
+     */
+    public function showSeller($id)
+    {
+        $seller = User::find($id);
+        if (!$seller) {
+            return redirect()->route('home')->withErrors(['Seller not found']);
+        }
+
+        $cards = Card::whereHas('user_card', function($query) use ($id) {
+            $query->where('user_id', $id)->where('is_private', false);
+        })->with('user_card')->get();
+        
+        $cards->map(function($card) {
+            $userCard = $card->user_card->first();
+            if (!$userCard) {
+                return null; // Skip if user_card does not exist
+            }
+            $card->name = str_replace("'", '’', $card->name);
+            $card->is_foil = $userCard->is_foil;
+            $card->is_borderless = $userCard->is_borderless;
+            $card->is_retro_frame = $userCard->is_retro_frame;
+            $card->is_etched_foil = $userCard->is_etched_foil;
+            $card->is_judge_promo_foil = $userCard->is_judge_promo_foil;
+            $card->is_japanese_language = $userCard->is_japanese_language;
+            $card->is_signed_by_artist = $userCard->is_signed_by_artist;
+            $card->image_url = $card->image_url ?? null;
+            $card->uploaded_at = $userCard->created_at->format('d/m/Y') ?? 'N/A';
+            return $card;
+        });
+
+        // Check if the seller is a favourite if user is logged in
+        $seller->is_favourite = false;
+        if (Auth::check()) {
+            $user = Auth::user();
+            $isFavourite = $user->sellers()->where('seller_id', $id)->exists();
+            $seller->is_favourited = $isFavourite;
+        }
+
+        return view('seller', compact('seller', 'cards'));
+    }
+
 
 }

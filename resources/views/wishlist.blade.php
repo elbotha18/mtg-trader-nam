@@ -260,9 +260,9 @@
             }
         });
 
-const popup = document.getElementById('card-image-popup');
-const popupImg = document.getElementById('popup-img');
-const popupLoading = document.getElementById('popup-loading');
+var popup = document.getElementById('card-image-popup');
+var popupImg = document.getElementById('popup-img');
+var popupLoading = document.getElementById('popup-loading');
 
 document.addEventListener('mouseover', async function(e) {
     const target = e.target.closest('.card-name-hover');
