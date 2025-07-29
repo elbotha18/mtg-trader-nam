@@ -7,8 +7,8 @@
         <div class="bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
             <div class="flex w-full max-w-sm flex-col gap-2">
                 <a href="{{ route('home') }}" class="flex flex-col items-center gap-2 font-medium" wire:navigate>
-                    <span class="flex h-9 w-9 mb-1 items-center justify-center rounded-md">
-                        <img src="/logo.webp" alt="NAMTG Logo" class="h-10 w-10 rounded" />
+                    <span class="flex h-30 w-30 mb-1 items-center justify-center rounded-md">
+                        <img src="/logo.webp" alt="NAMTG Logo" class="h-30 w-30 rounded" />
                     </span>
                     <span class="sr-only">{{ config('app.name', 'NAMTG Trader') }}</span>
                 </a>
