@@ -6,22 +6,50 @@
                     <h1 class="text-2xl font-bold text-neutral-800 dark:text-neutral-200">
                         {{ __('Wishlist') }}
                     </h1>
-                    <div class="flex-1 flex justify-center">
+                    <div class="flex gap-2 items-center">
                         <input id="cardSearchInput" type="text" placeholder="{{ __('Search cards...') }}" class="w-full max-w-xs rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 dark:focus:border-blue-400" oninput="filterCards()">
+                        <select id="sellerFilterSelect" onchange="handleSellerFilter()" class="w-full max-w-xs rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 dark:focus:border-blue-400">
+                            <option value="">{{ __('All sellers') }}</option>
+                            @foreach($availableSellers as $seller)
+                                <option value="{{ $seller->id }}" {{ request('seller_filter') == $seller->id ? 'selected' : '' }}>
+                                    {{ $seller->name }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
-                    <!-- Add this after the search input in your toolbar -->
-                    <button
-                        onclick="openAddWishlistModal()"
-                        class="btn btn-primary cursor-pointer px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        type="button"
-                    >
-                        {{ __('Add Bulk to Wishlist') }}
-                    </button>
+                    <div class="flex gap-2">
+                        <button
+                            onclick="copyVisibleList()"
+                            class="cursor-pointer px-4 py-2 text-sm font-medium text-neutral-700 bg-neutral-100 border border-neutral-300 rounded-md hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:bg-neutral-600 dark:text-neutral-200 dark:border-neutral-500 dark:hover:bg-neutral-700"
+                            type="button"
+                        >
+                            {{ __('Copy List') }}
+                        </button>
+                        <button
+                            onclick="openAddWishlistModal()"
+                            class="btn btn-primary cursor-pointer px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            type="button"
+                        >
+                            {{ __('Add Bulk to Wishlist') }}
+                        </button>
+                    </div>
                 </div>
                 <!-- display table with $cards -->
                 <div class="flex-1 overflow-auto p-4">
+                    @if(request('seller_filter'))
+                        <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-md">
+                            <p class="text-sm text-blue-800 dark:text-blue-200">
+                                {{ __('Showing cards sold by: ') }}<strong>{{ $availableSellers->firstWhere('id', request('seller_filter'))->name ?? 'Unknown Seller' }}</strong>
+                                <a href="{{ route('wishlist') }}" class="ml-2 text-blue-600 dark:text-blue-400 underline hover:no-underline">{{ __('Clear filter') }}</a>
+                            </p>
+                        </div>
+                    @endif
                     @if($cards->isEmpty())
-                        <p class="text-center text-gray-500">{{ __('No cards found. You can add cards with the button in the top right.') }}</p>
+                        @if(request('seller_filter'))
+                            <p class="text-center text-gray-500">{{ __('No cards found from the selected seller. Try a different seller or ') }}<a href="{{ route('wishlist') }}" class="text-blue-600 underline">{{ __('clear the filter') }}</a>{{ __('.') }}</p>
+                        @else
+                            <p class="text-center text-gray-500">{{ __('No cards found. You can add cards with the button in the top right.') }}</p>
+                        @endif
                     @else
                         <table class="w-full max-w-full divide-y divide-neutral-200 dark:divide-neutral-700 table-fixed">
                             <thead class="bg-neutral-100 dark:bg-neutral-800">
@@ -34,6 +62,9 @@
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                                         {{ __('Number') }}
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                                        {{ __('Sellers') }}
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                                         {{ __('Actions') }}
@@ -57,6 +88,9 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">
                                             {{ $card->number ?? __('N/A') }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">
+                                            {{ $card->sellers }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <form action="{{ route('wishlist.toggle') }}" method="POST" class="inline">
@@ -220,17 +254,92 @@
         }
 
         function filterCards() {
-            const input = document.getElementById('cardSearchInput').value.toLowerCase();
+            const cardInput = document.getElementById('cardSearchInput').value.toLowerCase();
+            
             document.querySelectorAll('tbody tr').forEach(row => {
                 const name = row.querySelector('td:nth-child(1)')?.textContent?.toLowerCase() || '';
                 const set = row.querySelector('td:nth-child(2)')?.textContent?.toLowerCase() || '';
                 const number = row.querySelector('td:nth-child(3)')?.textContent?.toLowerCase() || '';
-                if (name.includes(input) || set.includes(input) || number.includes(input)) {
+                
+                const matchesCard = cardInput === '' || name.includes(cardInput) || set.includes(cardInput) || number.includes(cardInput);
+                
+                if (matchesCard) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
                 }
             });
+        }
+
+        function handleSellerFilter() {
+            const sellerFilter = document.getElementById('sellerFilterSelect').value;
+            const currentUrl = new URL(window.location);
+            
+            if (sellerFilter === '') {
+                currentUrl.searchParams.delete('seller_filter');
+            } else {
+                currentUrl.searchParams.set('seller_filter', sellerFilter);
+            }
+            
+            window.location.href = currentUrl.toString();
+        }
+
+        function copyVisibleList() {
+            const visibleRows = Array.from(document.querySelectorAll('tbody tr'))
+                .filter(row => row.style.display !== 'none');
+            
+            if (visibleRows.length === 0) {
+                alert('{{ __("No cards to copy") }}');
+                return;
+            }
+            
+            const cardList = visibleRows.map(row => {
+                const name = row.querySelector('td:nth-child(1)')?.textContent?.trim() || '';
+                const set = row.querySelector('td:nth-child(2)')?.textContent?.trim() || '';
+                const number = row.querySelector('td:nth-child(3)')?.textContent?.trim() || '';
+                
+                // Format as "Card Name (SET) Number" - compatible with Moxfield format
+                if (set && number && number !== 'N/A') {
+                    return `${name} (${set}) ${number}`;
+                } else if (set) {
+                    return `${name} (${set})`;
+                } else {
+                    return name;
+                }
+            }).join('\n');
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(cardList).then(() => {
+                // Show success message
+                showCopySuccess();
+            }).catch(err => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = cardList;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showCopySuccess();
+            });
+        }
+
+        function showCopySuccess() {
+            // Create a temporary success message
+            const message = document.createElement('div');
+            message.textContent = '{{ __("Copied to clipboard!") }}';
+            message.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50 transition-opacity duration-300';
+            document.body.appendChild(message);
+            
+            // Remove the message after 2 seconds
+            setTimeout(() => {
+                message.style.opacity = '0';
+                setTimeout(() => {
+                    if (message.parentNode) {
+                        message.parentNode.removeChild(message);
+                    }
+                }, 300);
+            }, 2000);
         }
 
         // Close modal when clicking outside of it

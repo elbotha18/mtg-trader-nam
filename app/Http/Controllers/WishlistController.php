@@ -9,7 +9,7 @@ use App\Models\Card;
 
 class WishlistController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         // Get the logged-in user
         $user = Auth::user();
@@ -17,25 +17,91 @@ class WishlistController extends Controller
             return redirect()->route('login');
         }
 
-        // Get the user's wishlist items
-        $wishlistItems = UserWishlist::with('card')
+        $selectedSeller = $request->input('seller_filter', '');
+
+        // Get the user's wishlist items with sellers
+        $wishlistItems = UserWishlist::with(['card', 'card.user_card.user'])
             ->where('user_id', $user->id)
             ->get();
+
+        // Collect all unique sellers across all wishlist cards
+        $allSellers = collect();
         
-        $cards = $wishlistItems->map(function ($item) {
+        $cards = $wishlistItems->map(function ($item) use ($selectedSeller, &$allSellers) {
             if (!$item->card) {
                 return null; // Skip if card does not exist
             }
+
+            // Get all sellers for this card (excluding private listings)
+            $sellers = $item->card->user_card()
+                ->where('is_private', false)
+                ->with('user')
+                ->get()
+                ->pluck('user')
+                ->filter()
+                ->unique('id');
+
+            // Add sellers to the global collection
+            $sellers->each(function($seller) use (&$allSellers) {
+                $allSellers->push($seller);
+            });
+
+            // Filter by selected seller if provided
+            if ($selectedSeller && $sellers->isNotEmpty()) {
+                $matchingSellers = $sellers->filter(function ($seller) use ($selectedSeller) {
+                    return $seller->id == $selectedSeller;
+                });
+                
+                // If no sellers match the selection, skip this card
+                if ($matchingSellers->isEmpty()) {
+                    return null;
+                }
+                
+                $sellers = $matchingSellers;
+            } elseif ($selectedSeller && $sellers->isEmpty()) {
+                // If a seller filter is applied but this card has no sellers, skip it
+                return null;
+            }
+
+            // Format seller information
+            $sellerInfo = '';
+            if ($sellers->isEmpty()) {
+                $sellerInfo = 'No sellers';
+            } elseif ($sellers->count() === 1) {
+                $sellerInfo = $sellers->first()->name;
+            } else {
+                if ($selectedSeller) {
+                    // Show the selected seller with count of others
+                    $mainSeller = $sellers->first();
+                    $otherCount = $item->card->user_card()
+                        ->where('is_private', false)
+                        ->with('user')
+                        ->get()
+                        ->pluck('user')
+                        ->filter()
+                        ->unique('id')
+                        ->count() - 1;
+                    $sellerInfo = $mainSeller->name . ' (' . $otherCount . ' other seller' . ($otherCount > 1 ? 's' : '') . ')';
+                } else {
+                    $sellerInfo = $sellers->count() . ' sellers';
+                }
+            }
+
             return (object) [
                 'id' => $item->card->id,
-                'name' => str_replace("'", '’', $item->card->name),
+                'name' => str_replace("'", "'", $item->card->name),
                 'set' => $item->card->set,
                 'number' => $item->card->number,
-                'image_url' => $item->card->image_url
+                'image_url' => $item->card->image_url,
+                'sellers' => $sellerInfo,
+                'seller_count' => $sellers->count()
             ];
-        });
+        })->filter(); // Remove null entries
 
-        return view('wishlist', compact('cards'));
+        // Get unique sellers for the dropdown
+        $availableSellers = $allSellers->unique('id')->sortBy('name')->values();
+
+        return view('wishlist', compact('cards', 'availableSellers'));
     }
 
     public function addCards(Request $request)
