@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Auth;
 use Illuminate\Http\Request;
 use App\Models\UserWishlist;
-use App\Models\Card;
+use App\Models\AllCard;
 
 class WishlistController extends Controller
 {
@@ -128,10 +128,10 @@ class WishlistController extends Controller
             $number = isset($matches[3]) ? trim($matches[3]) : null;
 
             // Find or create the card
-            $card = Card::firstOrCreate([
+            $card = AllCard::firstOrCreate([
                 'name' => $name,
                 'set' => $set,
-                'number' => $number,
+                'collector_number' => $number,
             ]);
 
             // Add to wishlist

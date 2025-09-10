@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\SellerController;
+use App\Http\Controllers\AllCardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -23,8 +24,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('cards/add', [DashboardController::class, 'addCards'])->name('cards.add');
     Route::post('card/update', [DashboardController::class, 'updateCard'])->name('card.update');
     Route::post('card/delete', [DashboardController::class, 'deleteCard'])->name('card.delete');
+    Route::post('card/quick-add', [DashboardController::class, 'quickAddCard'])->name('card.quick-add');
     Route::post('card/toggle-private', [DashboardController::class, 'togglePrivate'])->name('card.toggle-private');
     Route::post('card/toggle-foil', [DashboardController::class, 'toggleFoil'])->name('card.toggle-foil');
+    Route::get('cards/search', [AllCardController::class, 'searchCard'])->name('cards.quicksearch');
 
     Route::get('wishlist', [WishlistController::class, 'index'])->name('wishlist');
     Route::post('toggle-wishlist', [WishlistController::class, 'toggleWishlist'])->name('wishlist.toggle');

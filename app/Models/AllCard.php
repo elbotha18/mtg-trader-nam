@@ -5,19 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Card extends Model
+class AllCard extends Model
 {
     use SoftDeletes;
-
+    
     protected $fillable = [
         'name',
+        'lang',
         'set',
-        'number',
-        'image_url'
+        'type_line',
+        'collector_number',
+        'image_url',
     ];
 
     /**
-     * Get the card's full name including set and number.
+     * Get the card's full name including set and collector_number.
      */
     public function getFullNameAttribute()
     {
@@ -25,19 +27,20 @@ class Card extends Model
         if ($this->set) {
             $fullName .= ' (' . $this->set . ')';
         }
-        if ($this->number) {
-            $fullName .= ' ' . $this->number;
+        if ($this->collector_number) {
+            $fullName .= ' ' . $this->collector_number;
         }
         return $fullName;
     }
 
     public function user_card()
     {
-        return $this->hasMany(UserCard::class);
+        return $this->hasMany(UserCard::class, 'card_id');
     }
 
     public function seller()
     {
         return $this->hasMany(UserCard::class)->where('is_private', false)->with('user');
     }
+    
 }

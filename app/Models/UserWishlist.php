@@ -18,6 +18,6 @@ class UserWishlist extends Model
 
     public function card()
     {
-        return $this->belongsTo(Card::class);
+        return $this->belongsTo(AllCard::class);
     }
 }

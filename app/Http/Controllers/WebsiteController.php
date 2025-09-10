@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Auth;
 use Illuminate\Http\Request;
-use App\Models\Card;
+use App\Models\AllCard;
 use App\Models\User;
 use App\Models\UserWishlist;
 use Illuminate\Support\Facades\Log;
@@ -28,10 +28,10 @@ class WebsiteController extends Controller
 
         if (!$request->advanced) {
             $query = $request->input('search', '');
-            $cards = Card::where(function($q) use ($query) {
+            $cards = AllCard::where(function($q) use ($query) {
                     $q->where('name', 'like', '%' . $query . '%')
                     ->orWhere('set', 'like', '%' . $query . '%')
-                    ->orWhere('number', 'like', '%' . $query . '%');
+                    ->orWhere('collector_number', 'like', '%' . $query . '%');
                 })
                 ->orderBy('name', 'asc')
                 ->whereHas('user_card', function($q) {
@@ -42,10 +42,10 @@ class WebsiteController extends Controller
         } else {
             $query = $request->input('search', '');
             $attributes = explode(',', $request->input('attributes', []));
-            $cards = Card::where(function($q) use ($query) {
+            $cards = AllCard::where(function($q) use ($query) {
                     $q->where('name', 'like', '%' . $query . '%')
                       ->orWhere('set', 'like', '%' . $query . '%')
-                      ->orWhere('number', 'like', '%' . $query . '%');
+                      ->orWhere('collector_number', 'like', '%' . $query . '%');
                 })
                 ->where(function($q) use ($attributes) {
                     foreach ($attributes as $attribute) {
@@ -78,9 +78,9 @@ class WebsiteController extends Controller
             return $card;
         });
 
-        // Group by name, set, and number (if number is present)
+        // Group by name, set, and numbcollector_numberer (if collector_number is present)
         $grouped = $cards->unique(function($item) {
-            return $item->name . '|' . $item->set . '|' . ($item->number ?? '') . '|' . $item->added_at;
+            return $item->name . '|' . $item->set . '|' . ($item->collector_number ?? '') . '|' . $item->added_at;
         })->values();
 
         return response()->json($grouped);
@@ -92,7 +92,7 @@ class WebsiteController extends Controller
             'card_id' => 'required|exists:cards,id',
             'image_url' => 'required|url'
         ]);
-        $card = Card::find($request->card_id);
+        $card = AllCard::find($request->card_id);
         $card->image_url = $request->image_url;
         $card->save();
         return response()->json(['success' => true]);
@@ -111,9 +111,9 @@ class WebsiteController extends Controller
         $number = $request->input('number', '');
         $attributes = explode(',', $request->input('attributes', ''));
 
-        $query = Card::whereRaw("REPLACE(name, '''', '’') = ?", [$name])
+        $query = AllCard::whereRaw("REPLACE(name, '''', '’') = ?", [$name])
             ->where('set', $set)
-            ->where('number', $number)
+            ->where('collector_number', $number)
             ->with('seller');
 
         // If advanced attributes are present, filter sellers by those attributes
@@ -186,7 +186,7 @@ class WebsiteController extends Controller
             return redirect()->route('home')->withErrors(['Seller not found']);
         }
 
-        $cards = Card::whereHas('user_card', function($query) use ($id) {
+        $cards = AllCard::whereHas('user_card', function($query) use ($id) {
             $query->where('user_id', $id)->where('is_private', false);
         })->with('user_card')->get();
         

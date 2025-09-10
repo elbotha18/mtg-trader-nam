@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\Loggable;
 
 class UserCard extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Loggable;
 
     protected $fillable = [
         'user_id',
@@ -29,7 +30,7 @@ class UserCard extends Model
 
     public function card()
     {
-        return $this->belongsTo(Card::class);
+        return $this->belongsTo(AllCard::class);
     }
 
     /**

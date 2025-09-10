@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use App\Models\AllCard;
+use App\Observers\AllCardObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,5 +28,8 @@ class AppServiceProvider extends ServiceProvider
         // Set the default locale or timezone here
         config(['app.locale' => 'en']);
         config(['app.timezone' => 'Africa/Windhoek']);
+        
+        // Register model observers
+        AllCard::observe(AllCardObserver::class);
     }
 }

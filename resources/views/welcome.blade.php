@@ -190,7 +190,7 @@
             const cards = allCards.slice(start, end);
             for (const card of cards) {
                 // Build showCard URL with advanced/attributes if present
-                let url = `/card?name=${encodeURIComponent(card.name)}&set=${encodeURIComponent(card.set)}&number=${encodeURIComponent(card.number || '')}`;
+                let url = `/card?name=${encodeURIComponent(card.name)}&set=${encodeURIComponent(card.set)}&number=${encodeURIComponent(card.collector_number || '')}`;
                 if (isAdvancedActive()) {
                     const attrs = getAdvancedAttributes();
                     if (attrs.length > 0) {
@@ -202,7 +202,7 @@
                         onclick="if(!event.target.closest('.wishlist-btn')) window.location='${url}'">
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200 card-name-hover overflow-x-wrap min-w-[250px] max-w-[340px] w-1/3" style="overflow-x: warp; white-space: wrap;"
                             data-set="${card.set}"
-                            data-number="${card.number || ''}"
+                            data-number="${card.collector_number || ''}"
                             data-name="${card.name}"
                             data-image-url="${card.image_url || ''}">
                             ${window.isLoggedIn ? `
@@ -217,7 +217,7 @@
                             ${card.name}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">${card.set}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">${card.number || 'N/A'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">${card.collector_number || 'N/A'}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200 max-w-xs overflow-x-auto">
                             <div class="card-attributes flex flex-wrap gap-1">
                                 ${card.is_foil ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">Foil</span>' : ''}

@@ -6,11 +6,26 @@
                     <h1 class="text-2xl font-bold text-neutral-800 dark:text-neutral-200">
                         {{ __('My Cards') }}
                     </h1>
-                    <div class="flex-1 flex justify-center">
+                    
+                    <!-- Quick Add Section -->
+                    <div class="flex-1 flex justify-center gap-4">                        
                         <input id="cardSearchInput" type="text" placeholder="{{ __('Search cards...') }}" class="w-full max-w-xs rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 dark:focus:border-blue-400" oninput="filterCards()">
                     </div>
+                    
                     <!-- Add Card and Add Bulk Buttons -->
                     <div class="flex items-center gap-2">
+                        <div class="relative">
+                            <input 
+                                id="quickAddInput" 
+                                type="text" 
+                                placeholder="{{ __('Type 3 letters to quick add...') }}" 
+                                class="w-64 rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 dark:focus:border-blue-400" 
+                                oninput="quickSearch(this.value)"
+                            >
+                            <div id="quickSearchResults" class="absolute z-50 w-full mt-1 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-lg hidden max-h-60 overflow-y-auto">
+                                <!-- Search results will be populated here -->
+                            </div>
+                        </div>
                         <button onclick="openAddCardsModal()" class="btn btn-primary cursor-pointer px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             {{ __('Add Cards') }}
                         </button>
@@ -28,6 +43,9 @@
                                         {{ __('Name') }}
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                                        {{ __('Type') }}
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                                         {{ __('Set') }}
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
@@ -43,6 +61,9 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-neutral-200 dark:bg-neutral-900 dark:divide-neutral-700">
                                 @foreach($cards as $card)
+                                    @if(!$card)
+                                        continue;
+                                    @endif
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">
                                             <span class="card-name-hover cursor-pointer"
@@ -53,6 +74,9 @@
                                                 data-image-url="{{ $card->image_url }}">
                                                 {{ $card->name }}
                                             </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">
+                                            {{ $card->type_line ?? __('N/A') }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">
                                             {{ $card->set }}
@@ -185,6 +209,42 @@
             <form id="editCardForm" action="{{ url('/card/update') }}" method="POST">
                 @csrf
                 <input type="hidden" name="id" id="edit_card_id">
+                
+                <!-- Card Information Fields -->
+                <div class="mb-4">
+                    <h3 class="text-lg font-medium text-neutral-800 dark:text-neutral-200 mb-3">
+                        {{ __('Card Information') }}
+                    </h3>
+                    <div class="grid grid-cols-1 gap-3">
+                        <div>
+                            <label for="edit_card_name" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                                {{ __('Name') }}
+                            </label>
+                            <input id="edit_card_name" name="name" type="text" class="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 dark:focus:border-blue-400">
+                        </div>
+                        <div>
+                            <label for="edit_card_type_line" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                                {{ __('Type') }}
+                            </label>
+                            <input id="edit_card_type_line" name="type_line" type="text" class="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 dark:focus:border-blue-400" placeholder="e.g., Creature — Human Wizard">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label for="edit_card_set" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                                    {{ __('Set') }}
+                                </label>
+                                <input id="edit_card_set" name="set" type="text" class="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 dark:focus:border-blue-400" placeholder="e.g., DOM">
+                            </div>
+                            <div>
+                                <label for="edit_card_collector_number" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                                    {{ __('Number') }}
+                                </label>
+                                <input id="edit_card_collector_number" name="collector_number" type="text" class="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 dark:focus:border-blue-400" placeholder="e.g., 123">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="mb-4">
                     <div>
                         <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
@@ -260,6 +320,134 @@
     </div>
 
     <script>
+        let quickSearchTimeout;
+        let currentQuery = '';
+        let currentOffset = 0;
+        
+        function quickSearch(query) {
+            const resultsDiv = document.getElementById('quickSearchResults');
+            
+            // Clear previous timeout
+            if (quickSearchTimeout) {
+                clearTimeout(quickSearchTimeout);
+            }
+            
+            // Hide results if less than 3 characters
+            if (query.length < 3) {
+                resultsDiv.classList.add('hidden');
+                currentQuery = '';
+                currentOffset = 0;
+                return;
+            }
+            
+            // Reset if this is a new search
+            if (query !== currentQuery) {
+                currentQuery = query;
+                currentOffset = 0;
+            }
+            
+            // Debounce the search to avoid too many requests
+            quickSearchTimeout = setTimeout(async () => {
+                await performSearch(query, 0, true);
+            }, 300);
+        }
+        
+        async function performSearch(query, offset = 0, resetResults = false) {
+            const resultsDiv = document.getElementById('quickSearchResults');
+            
+            try {
+                const response = await fetch(`/cards/search?q=${encodeURIComponent(query)}&offset=${offset}`);
+                const data = await response.json();
+                
+                if (data.cards && data.cards.length > 0) {
+                    const cardElements = data.cards.map(card => 
+                        `<div class="px-3 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-700 cursor-pointer border-b border-neutral-200 dark:border-neutral-600" onclick="selectQuickCard(${card.id}, '${card.name.replace(/'/g, "\\'")}')">
+                            ${card.name}
+                        </div>`
+                    ).join('');
+                    
+                    if (resetResults) {
+                        resultsDiv.innerHTML = cardElements;
+                    } else {
+                        // Remove existing load more button if present
+                        const existingLoadMore = resultsDiv.querySelector('.load-more-btn');
+                        if (existingLoadMore) {
+                            existingLoadMore.remove();
+                        }
+                        resultsDiv.insertAdjacentHTML('beforeend', cardElements);
+                    }
+                    
+                    // Add load more button if there are more results
+                    if (data.hasMore) {
+                        const loadMoreBtn = `<div class="load-more-btn px-3 py-2 text-center border-t border-neutral-200 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-750 hover:bg-neutral-100 dark:hover:bg-neutral-700 cursor-pointer text-blue-600 dark:text-blue-400 font-medium" onclick="loadMoreResults()">
+                            Load More
+                        </div>`;
+                        resultsDiv.insertAdjacentHTML('beforeend', loadMoreBtn);
+                    }
+                    
+                    resultsDiv.classList.remove('hidden');
+                    currentOffset = offset + data.cards.length;
+                } else if (resetResults) {
+                    resultsDiv.innerHTML = '<div class="px-3 py-2 text-neutral-500 dark:text-neutral-400">No cards found</div>';
+                    resultsDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error searching cards:', error);
+                if (resetResults) {
+                    resultsDiv.innerHTML = '<div class="px-3 py-2 text-red-500">Error searching cards</div>';
+                    resultsDiv.classList.remove('hidden');
+                }
+            }
+        }
+        
+        async function loadMoreResults() {
+            if (currentQuery) {
+                await performSearch(currentQuery, currentOffset, false);
+            }
+        }
+        
+        function selectQuickCard(cardId, cardName) {
+            // Clear the input and hide results first
+            document.getElementById('quickAddInput').value = '';
+            document.getElementById('quickSearchResults').classList.add('hidden');
+            
+            // Send request to add the card
+            fetch('/card/quick-add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ 
+                    card_id: cardId 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Refresh the page to show the new card
+                    window.location.reload();
+                } else {
+                    // Show error message
+                    alert(data.message || 'Failed to add card.');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding card:', error);
+                alert('An error occurred while adding the card.');
+            });
+        }
+        
+        // Hide search results when clicking outside
+        document.addEventListener('click', function(e) {
+            const quickAddInput = document.getElementById('quickAddInput');
+            const quickSearchResults = document.getElementById('quickSearchResults');
+            
+            if (!quickAddInput.contains(e.target) && !quickSearchResults.contains(e.target)) {
+                quickSearchResults.classList.add('hidden');
+            }
+        });
+
         function openAddCardsModal() {
             const modal = document.getElementById('addCardsModal');
             modal.classList.remove('hidden');
@@ -310,9 +498,10 @@
             const input = document.getElementById('cardSearchInput').value.toLowerCase();
             document.querySelectorAll('tbody tr').forEach(row => {
                 const name = row.querySelector('td:nth-child(1)')?.textContent?.toLowerCase() || '';
-                const set = row.querySelector('td:nth-child(2)')?.textContent?.toLowerCase() || '';
-                const number = row.querySelector('td:nth-child(3)')?.textContent?.toLowerCase() || '';
-                if (name.includes(input) || set.includes(input) || number.includes(input)) {
+                const type = row.querySelector('td:nth-child(2)')?.textContent?.toLowerCase() || '';
+                const set = row.querySelector('td:nth-child(3)')?.textContent?.toLowerCase() || '';
+                const number = row.querySelector('td:nth-child(4)')?.textContent?.toLowerCase() || '';
+                if (name.includes(input) || type.includes(input) || set.includes(input) || number.includes(input)) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
