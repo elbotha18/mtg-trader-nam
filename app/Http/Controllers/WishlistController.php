@@ -89,7 +89,7 @@ class WishlistController extends Controller
 
             return (object) [
                 'id' => $item->card->id,
-                'name' => str_replace("'", "'", $item->card->name),
+                'name' => str_replace("'", "’", $item->card->name),
                 'set' => $item->card->set,
                 'collector_number' => $item->card->collector_number,
                 'image_url' => $item->card->image_url,
