@@ -76,10 +76,10 @@
                                     <tr class="card-name-hover cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900 transition"
                                         data-id="{{ $card->id }}"
                                         data-set="{{ $card->set }}"
-                                        data-number="{{ $card->number }}"
+                                        data-number="{{ $card->collector_number }}"
                                         data-name="{{ $card->name }}"
                                         data-image-url="{{ $card->image_url }}"
-                                        onclick="if(!event.target.closest('button,svg,path')) window.location='/card?name={{ urlencode($card->name) }}&set={{ urlencode($card->set) }}&number={{ urlencode($card->number) }}'">
+                                        onclick="if(!event.target.closest('button,svg,path')) window.location='/card?name={{ urlencode($card->name) }}&set={{ urlencode($card->set) }}&number={{ urlencode($card->collector_number) }}'">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">
                                             {{ $card->name }}
                                         </td>
@@ -87,7 +87,7 @@
                                             {{ $card->set }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">
-                                            {{ $card->number ?? __('N/A') }}
+                                            {{ $card->collector_number ?? __('N/A') }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-neutral-200">
                                             {{ $card->sellers }}

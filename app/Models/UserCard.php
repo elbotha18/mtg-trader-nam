@@ -30,7 +30,7 @@ class UserCard extends Model
 
     public function card()
     {
-        return $this->belongsTo(AllCard::class);
+        return $this->belongsTo(AllCard::class, 'card_id');
     }
 
     /**

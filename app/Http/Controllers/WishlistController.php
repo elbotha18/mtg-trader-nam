@@ -91,7 +91,7 @@ class WishlistController extends Controller
                 'id' => $item->card->id,
                 'name' => str_replace("'", "'", $item->card->name),
                 'set' => $item->card->set,
-                'number' => $item->card->number,
+                'collector_number' => $item->card->collector_number,
                 'image_url' => $item->card->image_url,
                 'sellers' => $sellerInfo,
                 'seller_count' => $sellers->count()

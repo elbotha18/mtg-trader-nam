@@ -40,7 +40,7 @@ class AllCard extends Model
 
     public function seller()
     {
-        return $this->hasMany(UserCard::class)->where('is_private', false)->with('user');
+        return $this->hasMany(UserCard::class, 'card_id')->where('is_private', false)->with('user');
     }
     
 }

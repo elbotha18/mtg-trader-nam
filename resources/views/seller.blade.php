@@ -90,12 +90,12 @@
                             @foreach($cards as $card)
                                 <tr>
                                     <td class="px-4 py-2 text-sm text-blue-700 dark:text-blue-300">
-                                        <a href="{{ url('/card?name=' . urlencode($card->name) . '&set=' . urlencode($card->set) . '&number=' . urlencode($card->number)) }}" class="hover:underline">
+                                        <a href="{{ url('/card?name=' . urlencode($card->name) . '&set=' . urlencode($card->set) . '&number=' . urlencode($card->collector_number)) }}" class="hover:underline">
                                             {{ $card->name }}
                                         </a>
                                     </td>
                                     <td class="px-4 py-2 text-sm text-neutral-800 dark:text-neutral-200">{{ $card->set }}</td>
-                                    <td class="px-4 py-2 text-sm text-neutral-800 dark:text-neutral-200">{{ $card->number ?? __('N/A') }}</td>
+                                    <td class="px-4 py-2 text-sm text-neutral-800 dark:text-neutral-200">{{ $card->collector_number ?? __('N/A') }}</td>
                                     <td class="px-4 py-2 text-sm text-neutral-800 dark:text-neutral-200 max-w-xs overflow-x-auto">
                                         <div class="card-attributes flex flex-wrap gap-1">
                                             @if($card->is_foil)
