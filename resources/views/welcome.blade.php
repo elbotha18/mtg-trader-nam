@@ -63,35 +63,55 @@
                 </button>
             </div>
             <div id="advancedOptions" class="hidden mt-2 bg-neutral-50 dark:bg-neutral-800 rounded p-3 border border-neutral-200 dark:border-neutral-700">
-                <div class="flex flex-wrap gap-4">
-                    <label class="inline-flex items-center">
-                        <input type="checkbox" class="adv-attr h-4 w-4 text-blue-600 border-neutral-300 rounded focus:ring-blue-500 dark:border-neutral-600 dark:bg-neutral-700 dark:focus:ring-blue-400" value="is_foil">
-                        <span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Foil</span>
-                    </label>
-                    <label class="inline-flex items-center">
-                        <input type="checkbox" class="adv-attr h-4 w-4 text-green-600 border-neutral-300 rounded focus:ring-green-500 dark:border-neutral-600 dark:bg-neutral-700 dark:focus:ring-green-400" value="is_borderless">
-                        <span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Borderless</span>
-                    </label>
-                    <label class="inline-flex items-center">
-                        <input type="checkbox" class="adv-attr h-4 w-4 text-yellow-600 border-neutral-300 rounded focus:ring-yellow-500 dark:border-neutral-600 dark:bg-neutral-700 dark:focus:ring-yellow-400" value="is_retro_frame">
-                        <span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Retro Frame</span>
-                    </label>
-                    <label class="inline-flex items-center">
-                        <input type="checkbox" class="adv-attr h-4 w-4 text-purple-600 border-neutral-300 rounded focus:ring-purple-500 dark:border-neutral-600 dark:bg-neutral-700 dark:focus:ring-purple-400" value="is_etched_foil">
-                        <span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Etched Foil</span>
-                    </label>
-                    <label class="inline-flex items-center">
-                        <input type="checkbox" class="adv-attr h-4 w-4 text-red-600 border-neutral-300 rounded focus:ring-red-500 dark:border-neutral-600 dark:bg-neutral-700 dark:focus:ring-red-400" value="is_judge_promo_foil">
-                        <span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Judge Promo Foil</span>
-                    </label>
-                    <label class="inline-flex items-center">
-                        <input type="checkbox" class="adv-attr h-4 w-4 text-teal-600 border-neutral-300 rounded focus:ring-teal-500 dark:border-neutral-600 dark:bg-neutral-700 dark:focus:ring-teal-400" value="is_japanese_language">
-                        <span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Japanese Language</span>
-                    </label>
-                    <label class="inline-flex items-center">
-                        <input type="checkbox" class="adv-attr h-4 w-4 text-pink-600 border-neutral-300 rounded focus:ring-pink-500 dark:border-neutral-600 dark:bg-neutral-700 dark:focus:ring-pink-400" value="is_signed_by_artist">
-                        <span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Signed by Artist</span>
-                    </label>
+                <div class="flex flex-col gap-4">
+                    <!-- Type Filter -->
+                    <div>
+                        <label for="typeSelect" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Card Type:</label>
+                        <select id="typeSelect" class="rounded-md border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-200 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            <option value="">All Types</option>
+                            <option value="Land">Land</option>
+                            <option value="Creature">Creature</option>
+                            <option value="Artifact">Artifact</option>
+                            <option value="Enchantment">Enchantment</option>
+                            <option value="Instant">Instant</option>
+                            <option value="Sorcery">Sorcery</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Attributes -->
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Attributes:</label>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" class="adv-attr h-4 w-4 text-blue-600 border-neutral-300 rounded focus:ring-blue-500 dark:border-neutral-600 dark:bg-neutral-700 dark:focus:ring-blue-400" value="is_foil">
+                                <span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Foil</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" class="adv-attr h-4 w-4 text-green-600 border-neutral-300 rounded focus:ring-green-500 dark:border-neutral-600 dark:bg-neutral-700 dark:focus:ring-green-400" value="is_borderless">
+                                <span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Borderless</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" class="adv-attr h-4 w-4 text-yellow-600 border-neutral-300 rounded focus:ring-yellow-500 dark:border-neutral-600 dark:bg-neutral-700 dark:focus:ring-yellow-400" value="is_retro_frame">
+                                <span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Retro Frame</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" class="adv-attr h-4 w-4 text-purple-600 border-neutral-300 rounded focus:ring-purple-500 dark:border-neutral-600 dark:bg-neutral-700 dark:focus:ring-purple-400" value="is_etched_foil">
+                                <span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Etched Foil</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" class="adv-attr h-4 w-4 text-red-600 border-neutral-300 rounded focus:ring-red-500 dark:border-neutral-600 dark:bg-neutral-700 dark:focus:ring-red-400" value="is_judge_promo_foil">
+                                <span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Judge Promo Foil</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" class="adv-attr h-4 w-4 text-teal-600 border-neutral-300 rounded focus:ring-teal-500 dark:border-neutral-600 dark:bg-neutral-700 dark:focus:ring-teal-400" value="is_japanese_language">
+                                <span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Japanese Language</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" class="adv-attr h-4 w-4 text-pink-600 border-neutral-300 rounded focus:ring-pink-500 dark:border-neutral-600 dark:bg-neutral-700 dark:focus:ring-pink-400" value="is_signed_by_artist">
+                                <span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Signed by Artist</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -168,8 +188,15 @@
             let url = `/cards?search=${encodeURIComponent(query)}`;
             if (isAdvancedActive()) {
                 const attrs = getAdvancedAttributes();
-                if (attrs.length > 0) {
-                    url += `&advanced=1&attributes=${encodeURIComponent(attrs.join(','))}`;
+                const type = document.getElementById('typeSelect').value;
+                if (attrs.length > 0 || type) {
+                    url += `&advanced=1`;
+                    if (attrs.length > 0) {
+                        url += `&attributes=${encodeURIComponent(attrs.join(','))}`;
+                    }
+                    if (type) {
+                        url += `&type=${encodeURIComponent(type)}`;
+                    }
                 }
             }
             const res = await fetch(url);
@@ -193,8 +220,15 @@
                 let url = `/card?name=${encodeURIComponent(card.name)}&set=${encodeURIComponent(card.set)}&number=${encodeURIComponent(card.collector_number || '')}`;
                 if (isAdvancedActive()) {
                     const attrs = getAdvancedAttributes();
-                    if (attrs.length > 0) {
-                        url += `&advanced=1&attributes=${encodeURIComponent(attrs.join(','))}`;
+                    const type = document.getElementById('typeSelect').value;
+                    if (attrs.length > 0 || type) {
+                        url += `&advanced=1`;
+                        if (attrs.length > 0) {
+                            url += `&attributes=${encodeURIComponent(attrs.join(','))}`;
+                        }
+                        if (type) {
+                            url += `&type=${encodeURIComponent(type)}`;
+                        }
                     }
                 }
                 tbody.innerHTML += `
@@ -322,6 +356,9 @@
         document.querySelectorAll('.adv-attr').forEach(cb => {
             cb.addEventListener('change', triggerSearch);
         });
+        
+        // Trigger search when type dropdown changes
+        document.getElementById('typeSelect').addEventListener('change', triggerSearch);
         // Initial load
         fetchCards();
 

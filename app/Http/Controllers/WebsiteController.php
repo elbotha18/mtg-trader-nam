@@ -41,11 +41,17 @@ class WebsiteController extends Controller
             
         } else {
             $query = $request->input('search', '');
-            $attributes = explode(',', $request->input('attributes', []));
+            $attributes = explode(',', $request->input('attributes', ''));
+            $type = $request->input('type', '');
             $cards = AllCard::where(function($q) use ($query) {
                     $q->where('name', 'like', '%' . $query . '%')
                       ->orWhere('set', 'like', '%' . $query . '%')
                       ->orWhere('collector_number', 'like', '%' . $query . '%');
+                })
+                ->where(function($q) use ($type) {
+                    if ($type) {
+                        $q->where('type_line', 'like', '%' . $type . '%');
+                    }
                 })
                 ->where(function($q) use ($attributes) {
                     foreach ($attributes as $attribute) {
