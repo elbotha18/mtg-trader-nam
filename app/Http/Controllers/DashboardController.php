@@ -224,42 +224,50 @@ class DashboardController extends Controller
      */
     public function quickAddCard(Request $request)
     {
-        $request->validate([
-            'card_id' => 'required|exists:all_cards,id',
-        ]);
+        try {
+            $request->validate([
+                'card_id' => 'required|exists:all_cards,id',
+            ]);
 
-        $userId = Auth::id();
-        $cardId = $request->input('card_id');
+            $userId = Auth::id();
+            $cardId = $request->input('card_id');
 
-        // Check if user already has this card
-        $existingCard = UserCard::where('user_id', $userId)
-            ->where('card_id', $cardId)
-            ->first();
+            // Check if user already has this card
+            $existingCard = UserCard::where('user_id', $userId)
+                ->where('card_id', $cardId)
+                ->first();
 
-        if ($existingCard) {
+            if ($existingCard) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('You already have this card in your collection.')
+                ]);
+            }
+
+            // Add the card to user's collection
+            UserCard::create([
+                'user_id' => $userId,
+                'card_id' => $cardId,
+                'is_foil' => false,
+                'is_borderless' => false,
+                'is_retro_frame' => false,
+                'is_etched_foil' => false,
+                'is_judge_promo_foil' => false,
+                'is_japanese_language' => false,
+                'is_signed_by_artist' => false,
+                'is_private' => false,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => __('Card added to your collection successfully!')
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error in quickAddCard: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => __('You already have this card in your collection.')
+                'message' => __('Error: ') . $e->getMessage()
             ]);
         }
-
-        // Add the card to user's collection
-        UserCard::create([
-            'user_id' => $userId,
-            'card_id' => $cardId,
-            'is_foil' => false,
-            'is_borderless' => false,
-            'is_retro_frame' => false,
-            'is_etched_foil' => false,
-            'is_judge_promo_foil' => false,
-            'is_japanese_language' => false,
-            'is_signed_by_artist' => false,
-            'is_private' => false,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => __('Card added to your collection successfully!')
-        ]);
     }
 }
