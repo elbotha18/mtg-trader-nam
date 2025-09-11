@@ -475,8 +475,17 @@
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             document.body.style.overflow = 'hidden';
+            
             // Fill form fields
             document.getElementById('edit_card_id').value = card.id;
+            
+            // Fill card information fields
+            document.getElementById('edit_card_name').value = card.name || '';
+            document.getElementById('edit_card_type_line').value = card.type_line || '';
+            document.getElementById('edit_card_set').value = card.set || '';
+            document.getElementById('edit_card_collector_number').value = card.number || '';
+            
+            // Fill attribute checkboxes
             document.getElementById('edit_card_is_foil').checked = card.is_foil;
             document.getElementById('edit_card_is_borderless').checked = card.is_borderless;
             document.getElementById('edit_card_is_retro_frame').checked = card.is_retro_frame;
@@ -492,6 +501,22 @@
             modal.classList.add('hidden');
             modal.classList.remove('flex');
             document.body.style.overflow = 'auto';
+            
+            // Clear the form fields
+            document.getElementById('edit_card_name').value = '';
+            document.getElementById('edit_card_type_line').value = '';
+            document.getElementById('edit_card_set').value = '';
+            document.getElementById('edit_card_collector_number').value = '';
+            
+            // Clear checkboxes
+            document.getElementById('edit_card_is_foil').checked = false;
+            document.getElementById('edit_card_is_borderless').checked = false;
+            document.getElementById('edit_card_is_retro_frame').checked = false;
+            document.getElementById('edit_card_is_etched_foil').checked = false;
+            document.getElementById('edit_card_is_judge_promo_foil').checked = false;
+            document.getElementById('edit_card_is_japanese_language').checked = false;
+            document.getElementById('edit_card_is_signed_by_artist').checked = false;
+            document.getElementById('edit_card_is_private').checked = false;
         }
 
         function filterCards() {
