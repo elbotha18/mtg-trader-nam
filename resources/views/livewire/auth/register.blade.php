@@ -23,8 +23,11 @@ new #[Layout('components.layouts.auth')] class extends Component {
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
-            'cellphone' => ['required', 'string', 'max:20'],
+            // Require country code: starts with + and 6-15 digits after it
+            'cellphone' => ['required', 'string', 'max:20', 'regex:/^\\+[0-9]{6,15}$/'],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'cellphone.regex' => __('Please include your country code and start with a + followed by 6–15 digits. Example: +264812345678'),
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
@@ -71,7 +74,10 @@ new #[Layout('components.layouts.auth')] class extends Component {
             :label="__('Cellphone number')"
             type="string"
             required
-            placeholder="0810000000"
+            placeholder="+264810000000"
+            inputmode="tel"
+            pattern="\+[0-9]{6,15}"
+            title="Include country code, e.g. +264810000000"
         />
 
         <!-- Password -->
