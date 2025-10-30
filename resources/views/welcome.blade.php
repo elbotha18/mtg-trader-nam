@@ -202,14 +202,36 @@
                     }
                 }
             }
-            const res = await fetch(url);
-            allCards = await res.json();
+            const tbody = document.getElementById('cardsTableBody');
+            // Insert a loader row while fetching and formatting
+            tbody.innerHTML = `
+                <tr id="cardsLoaderRow">
+                    <td colspan="6" class="py-10 text-center">
+                        <div class="flex items-center justify-center gap-3">
+                            <svg class="animate-spin h-6 w-6 text-neutral-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                            </svg>
+                            <span class="text-neutral-600 dark:text-neutral-300">Loading cards…</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            try {
+                const res = await fetch(url);
+                allCards = await res.json();
+            } catch (err) {
+                console.error('Error fetching cards', err);
+                allCards = [];
+            }
             currentPage = 1;
             renderCards();
             renderPagination();
         }
         function renderCards() {
             const tbody = document.getElementById('cardsTableBody');
+            // Clear any loader or previous rows
             tbody.innerHTML = '';
             if (!allCards.length) {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-neutral-500">No cards found.</td></tr>`;
