@@ -52,6 +52,9 @@
         </p>
     </section>
 
+    <!-- Imagine Games Banner -->
+    @include('partials.ig-banner')
+
     <!-- Search Bar -->
     <section class="w-full max-w-2xl mx-auto px-4 mb-6">
         <div class="flex flex-col gap-2">
