@@ -38,7 +38,6 @@
 	'url' => url('/'),
 	'logo' => $ogImage,
 	'description' => $metaDescription,
-	],
 ], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) !!}
 </script>
 
