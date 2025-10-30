@@ -8,6 +8,7 @@ use App\Models\AllCard;
 use App\Models\User;
 use App\Models\UserWishlist;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class WebsiteController extends Controller
 {
@@ -26,41 +27,64 @@ class WebsiteController extends Controller
             $wishlistIds = UserWishlist::where('user_id', $user->id)->pluck('card_id')->toArray();
         }
 
+        $query = trim($request->input('search', ''));
+        $supportsFullText = DB::getDriverName() === 'mysql';
+
+        // Build a boolean-mode fulltext query (prefix-match each term) when supported
+        $fulltextQuery = null;
+        if ($supportsFullText && $query !== '') {
+            $terms = preg_split('/\s+/', $query);
+            $terms = array_filter($terms, fn($t) => strlen($t) > 0);
+            if (count($terms)) {
+                $fulltextQuery = implode(' ', array_map(fn($t) => '+' . addcslashes($t, '+-<>"') . '*', $terms));
+            }
+        }
+
         if (!$request->advanced) {
-            $query = $request->input('search', '');
-            $cards = AllCard::where(function($q) use ($query) {
+            // Non-advanced search: prefer fulltext when available
+            $cardsQuery = AllCard::query();
+            if ($fulltextQuery) {
+                $cardsQuery->whereRaw("MATCH(name, `set`, collector_number) AGAINST(? IN BOOLEAN MODE)", [$fulltextQuery]);
+            } else {
+                $cardsQuery->where(function($q) use ($query) {
                     $q->where('name', 'like', '%' . $query . '%')
-                    ->orWhere('set', 'like', '%' . $query . '%')
-                    ->orWhere('collector_number', 'like', '%' . $query . '%');
-                })
-                ->orderBy('name', 'asc')
+                      ->orWhere('set', 'like', '%' . $query . '%')
+                      ->orWhere('collector_number', 'like', '%' . $query . '%');
+                });
+            }
+
+            $cards = $cardsQuery->orderBy('name', 'asc')
                 ->whereHas('user_card', function($q) {
                     $q->where('is_private', false);
                 })
                 ->get();
-            
         } else {
-            $query = $request->input('search', '');
+            // Advanced search: also filter by attributes and type_line
             $attributes = explode(',', $request->input('attributes', ''));
             $type = $request->input('type', '');
-            $cards = AllCard::where(function($q) use ($query) {
+
+            $cardsQuery = AllCard::query();
+            if ($fulltextQuery) {
+                $cardsQuery->whereRaw("MATCH(name, `set`, collector_number) AGAINST(? IN BOOLEAN MODE)", [$fulltextQuery]);
+            } else {
+                $cardsQuery->where(function($q) use ($query) {
                     $q->where('name', 'like', '%' . $query . '%')
                       ->orWhere('set', 'like', '%' . $query . '%')
                       ->orWhere('collector_number', 'like', '%' . $query . '%');
-                })
-                ->where(function($q) use ($type) {
-                    if ($type) {
-                        $q->where('type_line', 'like', '%' . $type . '%');
-                    }
-                })
-                ->where(function($q) use ($attributes) {
-                    foreach ($attributes as $attribute) {
-                        if ($attribute) {
-                            $q->where($attribute, true);
-                        }
-                    }
-                })
-                ->orderBy('name', 'asc')
+                });
+            }
+
+            if ($type) {
+                $cardsQuery->where('type_line', 'like', '%' . $type . '%');
+            }
+
+            foreach ($attributes as $attribute) {
+                if ($attribute) {
+                    $cardsQuery->where($attribute, true);
+                }
+            }
+
+            $cards = $cardsQuery->orderBy('name', 'asc')
                 ->whereHas('user_card', function($q) {
                     $q->where('is_private', false);
                 })
