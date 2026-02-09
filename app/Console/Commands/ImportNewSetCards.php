@@ -66,11 +66,9 @@ class ImportNewSetCards extends Command
 
             $totalImported += $imported;
             $this->info("Imported {$imported} cards for '{$setName}' ({$setCode}).");
-            Log::info("[ImportNewSetCards] Imported {$imported} cards for '{$setName}' ({$setCode}).");
         }
 
         $this->info("Done! Total cards imported: {$totalImported}");
-        Log::info("[ImportNewSetCards] Completed. Total cards imported: {$totalImported}");
 
         return self::SUCCESS;
     }
