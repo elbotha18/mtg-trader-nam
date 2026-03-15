@@ -6,6 +6,7 @@ use App\Models\AllCard;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Client\PendingRequest;
 use Carbon\Carbon;
 
 class ImportNewSetCards extends Command
@@ -78,7 +79,7 @@ class ImportNewSetCards extends Command
      */
     private function getNewlyReleasedSets(int $days): \Illuminate\Support\Collection
     {
-        $response = Http::get(self::SCRYFALL_SETS_URL);
+        $response = $this->scryfallClient()->get(self::SCRYFALL_SETS_URL);
 
         if (!$response->successful()) {
             $this->error('Failed to fetch sets from Scryfall API.');
@@ -114,7 +115,7 @@ class ImportNewSetCards extends Command
         do {
             usleep(self::SCRYFALL_RATE_LIMIT_MS * 1000);
 
-            $response = Http::get($url);
+            $response = $this->scryfallClient()->get($url);
 
             if (!$response->successful()) {
                 // A 404 means no cards found for this set, which is valid
@@ -149,6 +150,14 @@ class ImportNewSetCards extends Command
         }
 
         return $imported;
+    }
+
+    private function scryfallClient(): PendingRequest
+    {
+        return Http::withHeaders([
+            'User-Agent' => sprintf('%s/1.0 (+%s)', config('app.name', 'mtg-trader'), config('app.url', 'http://localhost')),
+            'Accept' => 'application/json',
+        ]);
     }
 
     /**
